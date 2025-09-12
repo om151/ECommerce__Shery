@@ -2,7 +2,7 @@
 
 This document provides detailed information about the API endpoints available in the User module.
 
-## Base Path: `/api/user`
+## Base Path: `/user`
 
 ---
 
