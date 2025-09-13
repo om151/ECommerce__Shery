@@ -2,7 +2,7 @@ const { Product, ProductVariant } = require("../models/product.model");
 const Inventory = require("../models/inventory.model");
 const mongoose = require("mongoose");
 const { image } = require("../../../config/cloudinary");
-const asyncHandler = require("../../utils/asyncHandler");
+const asyncHandler = require("../../../utils/asyncHandler");
 const {
   editProductService,
   editVariantService,
@@ -65,36 +65,28 @@ exports.addProductWithVariants = asyncHandler(async (req, res) => {
 
   // Defensive: ensure categories, searchKeywords, variants, attributes are present
   if (!categories || !Array.isArray(categories)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Categories are required and must be an array.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Categories are required and must be an array.",
+    });
   }
   if (!searchKeywords || !Array.isArray(searchKeywords)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Search keywords are required and must be an array.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Search keywords are required and must be an array.",
+    });
   }
   if (!variants || !Array.isArray(variants)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Variants are required and must be an array.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Variants are required and must be an array.",
+    });
   }
   if (!attributes || typeof attributes !== "object") {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Attributes are required and must be an object.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Attributes are required and must be an object.",
+    });
   }
 
   const product = await addProductWithVariantsService({

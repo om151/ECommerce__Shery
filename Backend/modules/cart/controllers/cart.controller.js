@@ -1,4 +1,4 @@
-const asyncHandler = require("../../utils/asyncHandler");
+const asyncHandler = require("../../../utils/asyncHandler");
 const cartService = require("../services/cart.service");
 
 exports.addToCart = asyncHandler(async (req, res, next) => {

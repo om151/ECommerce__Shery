@@ -11,7 +11,7 @@ const {
   handleVerifyEmail,
   sendVerificationEmailFnc,
 } = require("../services/user.services");
-const asyncHandler = require("../../utils/asyncHandler");
+const asyncHandler = require("../../../utils/asyncHandler");
 
 const registerUser = asyncHandler(async (req, res) => {
   const error = validationResult(req);

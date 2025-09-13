@@ -3,12 +3,12 @@ const crypto = require("crypto");
 const {
   sendVerificationEmail,
   sendResetPasswordEmail,
-} = require("../../utils/emailService");
-const CustomError = require("../../utils/CustomError");
+} = require("../../../utils/emailService");
+const CustomError = require("../../../utils/CustomError");
 
 const MAX_LOGIN_ATTEMPTS = 3;
 const LOCK_TIME = 10 * 60 * 1000;
-const asyncHandler = require("../../utils/asyncHandler");
+const asyncHandler = require("../../../utils/asyncHandler");
 
 async function createUser({ email, password, name, phone }) {
   try {
@@ -37,7 +37,6 @@ async function authenticateUser(email, password) {
   const user = await userModel.findOne({ email }).select("+password");
 
   if (!user)
-    
     throw new CustomError(
       "Invalid credentials",
       401,
