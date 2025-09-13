@@ -69,6 +69,7 @@ async function addVariantToProductService(productId, variantData, files) {
     compareAtPrice: variantData.compareAtPrice,
     images: files.map((f) => f.path),
     inventoryId: inventory._id,
+    productId: product._id,
   });
 
   // Update inventory with variantId
@@ -116,6 +117,7 @@ async function addProductWithVariantsService({
       compareAtPrice: variant.compareAtPrice,
       images: imageMap[variant.tempId] || [],
       inventoryId: inventory._id,
+      productId: null, // Will set after product creation
     });
 
     inventory.variantId = createdVariant._id;
@@ -134,6 +136,11 @@ async function addProductWithVariantsService({
   });
 
   await Inventory.updateMany(
+    { productId: null },
+    { $set: { productId: product._id } }
+  );
+
+  await ProductVariant.updateMany(
     { productId: null },
     { $set: { productId: product._id } }
   );

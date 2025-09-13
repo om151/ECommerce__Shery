@@ -4,12 +4,7 @@ const Wishlist = require("../models/wishlist.model");
 
 // Add product to wishlist
 async function addToWishlist(userId, productId) {
-  console.log(
-    "Adding to wishlist for userId:",
-    userId,
-    "productId:",
-    typeof productId
-  ); // Debugging line
+  
   let wishlist = await Wishlist.findOne({ userId });
   if (!wishlist) {
     wishlist = await Wishlist.create({ userId, products: [{ productId }] });

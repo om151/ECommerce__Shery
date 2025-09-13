@@ -7,6 +7,7 @@ const ProductVariantSchema = new mongoose.Schema({
     color: { type: String, required: true },
     size: { type: String, required: true },
   },
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
   price: { type: Number, required: true },
   compareAtPrice: { type: Number, required: true },
   images: { type: [String] }, // require : true
