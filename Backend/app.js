@@ -5,7 +5,9 @@ const bodyParser = require('body-parser');
 const cookieParser = require( "cookie-parser");
 const { connectToDb } = require('./db/dbConnect');
 
-const userRoutes = require('./modules/User/user.routes');
+const userRoutes = require('./modules/User/routes/user.routes');
+const errorHandler = require('./modules/utils/globalErrorHandler');
+const productRoutes = require('./modules/Product/routes/product.route');
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/user', userRoutes );
+app.use('/product', productRoutes );
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {
   console.log("🚀 Server running...");

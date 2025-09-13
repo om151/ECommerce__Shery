@@ -1,44 +1,43 @@
-const userModel = require("./user.model");
+const userModel = require("../models/user.model");
 const crypto = require("crypto");
 const {
   sendVerificationEmail,
   sendResetPasswordEmail,
-} = require("../utils/emailService");
-const CustomError = require("../utils/CustomError");
+} = require("../../utils/emailService");
+const CustomError = require("../../utils/CustomError");
 
 const MAX_LOGIN_ATTEMPTS = 3;
 const LOCK_TIME = 10 * 60 * 1000;
+const asyncHandler = require("../../utils/asyncHandler");
 
 async function createUser({ email, password, name, phone }) {
+  try {
+    const hashPassword = await userModel.hashPassword(password);
 
-  try{
-  const hashPassword = await userModel.hashPassword(password);
- 
+    const user = await userModel.create({
+      email,
+      password: hashPassword,
+      name,
+      phone,
+      emailVerified: false,
+    });
 
-  const user = await userModel.create({
-    email,
-    password: hashPassword,
-    name,
-    phone,
-    emailVerified: false,
-  });
-
-
-    const {message , verificationLink} = await sendVerificationEmailFnc(email);
-     return { user, verificationLink };
-  }catch(error){
+    const { message, verificationLink } = await sendVerificationEmailFnc(email);
+    return { user, verificationLink };
+  } catch (error) {
     throw new CustomError(
       error.message || "Error sending verification email",
       error.statusCode || 500,
       error.name || "EmailServiceError"
     );
   }
- 
 }
 
 async function authenticateUser(email, password) {
   const user = await userModel.findOne({ email }).select("+password");
+
   if (!user)
+    
     throw new CustomError(
       "Invalid credentials",
       401,
@@ -223,7 +222,7 @@ async function sendVerificationEmailFnc(email) {
     user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
     user.emailVerificationExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
-  }else{
+  } else {
     throw new CustomError(
       "A verification email has already been sent. Please wait until the previous one expires.",
       400,
@@ -233,7 +232,11 @@ async function sendVerificationEmailFnc(email) {
 
   const verificationLink = `${process.env.FRONTEND_URL}/user/verify-email?token=${user.emailVerificationToken}`;
   const resendVerificationLink = `${process.env.FRONTEND_URL}/user/resend-verification-email?mail=${user.email}`;
-  await sendVerificationEmail(user.email, verificationLink,resendVerificationLink);
+  await sendVerificationEmail(
+    user.email,
+    verificationLink,
+    resendVerificationLink
+  );
 
   return { message: "Verification email sent.", verificationLink };
 }

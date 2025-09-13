@@ -9,9 +9,9 @@ const {
   forgotPassword,
   resetPassword,
   verifyEmail,
-  resendVerificationEmail
-} = require("./user.controller");
-const authMiddleware = require("../../middleware/auth.middleware");
+  resendVerificationEmail,
+} = require("../controllers/user.controller");
+const authMiddleware = require("../../../middleware/auth.middleware");
 
 router.post(
   "/register",

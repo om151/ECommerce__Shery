@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema(
       maxlength: [10, "Phone number must be at most 10 digits"],
     },
     role: { type: String, enum: ["user", "admin"], default: "user"  },
-    addresses: [
+    addresses: {
+      type:[
       {
         label: { type: String, required: [true, "Address label is required"] },
         line1: { type: String, required: [true, "Address line 1 is required"] },
@@ -49,7 +50,10 @@ const userSchema = new mongoose.Schema(
         country: { type: String, required: [true, "Country is required"] },
       },
     ],
-    wishlistItems: [
+    select: false,
+  },
+    wishlistItems:{
+      type: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
@@ -59,16 +63,24 @@ const userSchema = new mongoose.Schema(
         addedAt: { type: Date, default: Date.now },
       },
     ],
-    orderHistory: [
+    select:false
+    },
+    orderHistory: {
+      type: [
       {
         orderId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Order",
           required: [true, "Order ID is required"],
+          select: false,
         },
         orderedAt: { type: Date, default: Date.now },
+        
       },
     ],
+    select:false
+      }
+    ,
     isActive: { type: Boolean, default: true },
     failedLoginAttempts: {
       type: Number,

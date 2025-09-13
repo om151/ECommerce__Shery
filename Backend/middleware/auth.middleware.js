@@ -1,7 +1,7 @@
-const userModel = require("../modules/User/user.model");
+const userModel = require("../modules/User/models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const BlacklistToken = require("../modules/User/blacklistToken.model");
+const BlacklistToken = require("../modules/User/models/blacklistToken.model");
 
 const authMiddleware = async (req, res, next) => {
   const token =

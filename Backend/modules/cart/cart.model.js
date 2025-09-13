@@ -5,7 +5,6 @@ const CartItemSchema = new mongoose.Schema(
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
     variantId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductVariant', required: true },
     quantity: { type: Number, required: true, min: 1 },
-    unitPrice: { type: Number, required: true, min: 0 },
     totalPrice: { type: Number, required: true, min: 0 },
   },
   { _id: false }
