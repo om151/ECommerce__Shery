@@ -9,6 +9,7 @@ const userRoutes = require('./modules/User/routes/user.routes');
 const errorHandler = require('./modules/utils/globalErrorHandler');
 const productRoutes = require('./modules/Product/routes/product.route');
 const couponRoutes = require('./modules/Coupon/routes/coupon.routes');
+const wishlistRoutes = require('./modules/Wishlist/router/wishlist.routes');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 app.use('/user', userRoutes );
 app.use('/product', productRoutes );
 app.use('/coupon', couponRoutes );
+app.use('/wishlist', wishlistRoutes );
 app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {

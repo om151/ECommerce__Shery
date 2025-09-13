@@ -52,18 +52,10 @@ const userSchema = new mongoose.Schema(
     ],
     select: false,
   },
-    wishlistItems:{
-      type: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: [true, "Product ID is required"],
-        },
-        addedAt: { type: Date, default: Date.now },
-      },
-    ],
-    select:false
+    wishlist:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Wishlist",
+      select: false
     },
     orderHistory: {
       type: [
