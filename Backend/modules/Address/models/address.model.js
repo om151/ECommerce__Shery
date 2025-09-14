@@ -23,4 +23,19 @@ const AddressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Prevent the same exact address (ignoring label) being added multiple times by the same user
+// We index the combination of user + address location fields. line2 is optional so we coalesce to empty string at write time (handled in service layer too)
+AddressSchema.index(
+  {
+    userId: 1,
+    line1: 1,
+    line2: 1,
+    city: 1,
+    state: 1,
+    postalCode: 1,
+    country: 1,
+  },
+  { unique: true, name: "uniq_user_address_components" }
+);
+
 module.exports = mongoose.model("Address", AddressSchema);
