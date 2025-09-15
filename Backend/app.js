@@ -12,6 +12,9 @@ const couponRoutes = require("./modules/Coupon/routes/coupon.routes");
 const wishlistRoutes = require("./modules/Wishlist/router/wishlist.routes");
 const cartRoutes = require("./modules/cart/router/cart.routes");
 const addressRoutes = require("./modules/Address/routes/address.routes");
+const orderRoutes = require("./modules/Orders/routes/order.routes");
+const paymentRoutes = require("./modules/Payment/routes/payment.routes");
+const reviewRoutes = require("./modules/Review/routes/review.routes");
 
 dotenv.config();
 
@@ -42,6 +45,9 @@ app.use("/coupon", couponRoutes);
 app.use("/wishlist", wishlistRoutes);
 app.use("/cart", cartRoutes);
 app.use("/address", addressRoutes);
+app.use("/order", orderRoutes);
+app.use("/payment", paymentRoutes);
+app.use("/review", reviewRoutes);
 app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {
