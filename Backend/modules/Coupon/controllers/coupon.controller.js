@@ -17,3 +17,15 @@ exports.softDeleteCoupon = asyncHandler(async (req, res, next) => {
   await couponService.softDeleteCoupon(couponId);
   res.status(200).json({ message: "Coupon deleted (soft) successfully" });
 });
+
+exports.validateCoupon = asyncHandler(async (req, res, next) => {
+  const { code, orderTotal, productIds } = req.body;
+  const userId = req.user?._id;
+  const result = await couponService.validateCoupon({
+    code,
+    orderTotal,
+    productIds,
+    userId,
+  });
+  res.status(200).json(result);
+});

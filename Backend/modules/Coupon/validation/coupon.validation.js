@@ -50,7 +50,6 @@ exports.validateCreateCouponUsage = [
   handleValidation,
 ];
 
-
 exports.validateCreateCoupon = [
   body("code").notEmpty().withMessage("Code is required"),
   body("name").notEmpty().withMessage("Name is required"),
@@ -60,7 +59,33 @@ exports.validateCreateCoupon = [
   body("maxDiscount")
     .isNumeric()
     .withMessage("Max discount is required and must be a number"),
-  body("validFrom").notEmpty().withMessage("Valid from date is required"),
+  body("validFrom")
+    .notEmpty()
+    .withMessage("Valid from date is required")
+    .custom((value) => {
+      if (typeof value === 'string') {
+        if (isNaN(Date.parse(value))) throw new Error('validFrom must be a valid ISO date string');
+        return true;
+      }
+      if (typeof value === 'object' && value.$date) {
+        if (isNaN(Date.parse(value.$date))) throw new Error('validFrom.$date must be a valid date string');
+        return true;
+      }
+      throw new Error('validFrom must be an ISO string or {$date: "..."}');
+    }),
+  body("validTo")
+    .optional()
+    .custom((value) => {
+      if (typeof value === 'string') {
+        if (isNaN(Date.parse(value))) throw new Error('validTo must be a valid ISO date string');
+        return true;
+      }
+      if (typeof value === 'object' && value.$date) {
+        if (isNaN(Date.parse(value.$date))) throw new Error('validTo.$date must be a valid date string');
+        return true;
+      }
+      throw new Error('validTo must be an ISO string or {$date: "..."}');
+    }),
   handleValidation,
 ];
 
@@ -77,8 +102,30 @@ exports.validateEditCoupon = [
     .withMessage("Max discount must be a number"),
   body("validFrom")
     .optional()
-    .notEmpty()
-    .withMessage("Valid from date is required"),
+    .custom((value) => {
+      if (typeof value === 'string') {
+        if (isNaN(Date.parse(value))) throw new Error('validFrom must be a valid ISO date string');
+        return true;
+      }
+      if (typeof value === 'object' && value.$date) {
+        if (isNaN(Date.parse(value.$date))) throw new Error('validFrom.$date must be a valid date string');
+        return true;
+      }
+      throw new Error('validFrom must be an ISO string or {$date: "..."}');
+    }),
+  body("validTo")
+    .optional()
+    .custom((value) => {
+      if (typeof value === 'string') {
+        if (isNaN(Date.parse(value))) throw new Error('validTo must be a valid ISO date string');
+        return true;
+      }
+      if (typeof value === 'object' && value.$date) {
+        if (isNaN(Date.parse(value.$date))) throw new Error('validTo.$date must be a valid date string');
+        return true;
+      }
+      throw new Error('validTo must be an ISO string or {$date: "..."}');
+    }),
   handleValidation,
 ];
 
@@ -87,3 +134,18 @@ exports.validateCouponId = [
   handleValidation,
 ];
 
+exports.validateValidateCouponRequest = [
+  body("code").notEmpty().withMessage("Coupon code is required"),
+  body("orderTotal")
+    .notEmpty()
+    .withMessage("orderTotal is required")
+    .isNumeric()
+    .withMessage("orderTotal must be a number"),
+  body("productIds")
+    .optional()
+    .isArray()
+    .withMessage("productIds must be an array")
+    .custom((arr) => arr.every((id) => mongoose.Types.ObjectId.isValid(id)))
+    .withMessage("All productIds must be valid Mongo ObjectIds"),
+  handleValidation,
+];
