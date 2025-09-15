@@ -1,7 +1,5 @@
 # Coupon API Endpoints Documentation
 
-
-
 ## Base Route
 
 All routes are prefixed with `/coupon` (or as configured in your main router).
@@ -90,3 +88,56 @@ All routes are prefixed with `/coupon` (or as configured in your main router).
 - Replace `<couponId>`, `<userId>`, and `<orderId>` with actual MongoDB ObjectIds.
 - Validation errors return `400` with details.
 - Coupon creation and usage require valid, active coupon and user IDs.
+
+---
+
+### 5. Validate Coupon
+
+- URL: `/validation`
+- Method: `POST`
+- Body:
+
+```json
+{
+  "code": "WELCOME10",
+  "userId": "<userId>",
+  "orderValue": 1299.0
+}
+```
+
+- Description: Validates a coupon code for a given user and order value. Checks include:
+
+  - Coupon exists, is active, and within validity window (validFrom/validTo)
+  - Usage limit not exceeded (global and/or per user, if enforced)
+  - Minimum order value satisfied
+  - Additional business constraints as configured
+
+- Response (valid): `200 OK`
+
+```json
+{
+  "valid": true,
+  "coupon": {
+    "_id": "<couponId>",
+    "code": "WELCOME10",
+    "discountType": "percentage",
+    "maxDiscount": 100,
+    "minOrderValue": 500
+  },
+  "discountAmount": 130,
+  "message": "Coupon applied successfully"
+}
+```
+
+- Response (invalid): `200 OK`
+
+```json
+{
+  "valid": false,
+  "message": "Coupon expired or minimum order value not met"
+}
+```
+
+Notes:
+
+- If you prefer to return HTTP 400 for invalid coupons, adjust your controller accordingly; the example above returns `200` with `valid: false` to let clients uniformly handle validation feedback.
