@@ -10,6 +10,7 @@ const {
   handleResetPassword,
   handleVerifyEmail,
   sendVerificationEmailFnc,
+  updateUserDetails,
 } = require("../services/user.services");
 const asyncHandler = require("../../../utils/asyncHandler");
 
@@ -108,6 +109,20 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
   res.status(200).json({ message, verificationLink });
 });
 
+// Update user details (name, phone)
+const updateUser = asyncHandler(async (req, res) => {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(400).json({ errors: error.array() });
+  }
+
+  const updatedUser = await updateUserDetails(req.user._id, req.body);
+  
+  return res
+    .status(200)
+    .json({ user: updatedUser, message: "Profile updated successfully" });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -117,4 +132,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerificationEmail,
+  updateUser,
 };

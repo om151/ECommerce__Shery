@@ -10,63 +10,34 @@ const {
   resetPassword,
   verifyEmail,
   resendVerificationEmail,
+  updateUser,
 } = require("../controllers/user.controller");
 const authMiddleware = require("../../../middleware/auth.middleware");
+const {
+  validateRegister,
+  validateLogin,
+  validateForgotPassword,
+  validateResetPassword,
+  validateEditUser,
+} = require("../validation/user.validation");
 
-router.post(
-  "/register",
-  [
-    body("email").isEmail().withMessage("Invalid Email"),
-    body("name")
-      .isLength({ min: 2 })
-      .withMessage("Name must be at least 2 characters long"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long")
-      .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,100}$/
-      )
-      .withMessage(
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-      ),
-    body("phone").isMobilePhone().withMessage("Invalid Phone Number"),
-  ],
-  registerUser
-);
+router.post("/register", validateRegister, registerUser);
 
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Invalid Email"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long"),
-  ],
-  loginUser
-);
+router.post("/login", validateLogin, loginUser);
 
 router.get("/profile", authMiddleware, getProfile);
 
 router.post("/logout", authMiddleware, logoutUser);
-router.post(
-  "/forgot-password",
-  [body("email").isEmail().withMessage("Invalid Email")],
-  forgotPassword
-);
-router.post(
-  "/reset-password",
-  [
-    body("newPassword")
-      .isLength({ min: 6 })
-      .withMessage("New password must be at least 6 characters long"),
-  ],
-  resetPassword
-);
+router.post("/forgot-password", validateForgotPassword, forgotPassword);
+router.post("/reset-password", validateResetPassword, resetPassword);
 router.get("/verify-email", verifyEmail);
 router.get(
   "/resend-verification-email",
   // [body("email").isEmail().withMessage("Invalid Email")],
   resendVerificationEmail
 );
+
+// Edit user details
+router.put("/edit", authMiddleware, validateEditUser, updateUser);
 
 module.exports = router;

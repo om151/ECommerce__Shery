@@ -94,6 +94,40 @@ async function authenticateUser(email, password) {
   return { user, token };
 }
 
+async function updateUserDetails(userId, data) {
+  const allowedFields = ["name", "phone"];
+  const updates = {};
+  for (const key of allowedFields) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      updates[key] = data[key];
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new CustomError("No valid fields to update", 400, "NoUpdateFields");
+  }
+
+  // Ensure phone is unique when updating
+  if (updates.phone) {
+    const existing = await userModel.findOne({
+      phone: updates.phone,
+      _id: { $ne: userId },
+    });
+    if (existing) {
+      throw new CustomError("Phone number already exists", 400, "PhoneExistsError");
+    }
+  }
+
+  const updatedUser = await userModel.findByIdAndUpdate(userId, updates, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedUser) throw new CustomError("User not found", 404, "UserNotFound");
+
+  return updatedUser;
+}
+
 async function handleForgotPassword(email) {
   const user = await userModel.findOne({ email });
   if (!user)
@@ -243,6 +277,7 @@ async function sendVerificationEmailFnc(email) {
 module.exports = {
   createUser,
   authenticateUser,
+  updateUserDetails,
   handleForgotPassword,
   handleResetPassword,
   handleVerifyEmail,
