@@ -191,7 +191,7 @@ async function handleForgotPassword(email) {
   user.lastPasswordResetRequest = Date.now();
   await user.save();
 
-  const resetLink = `${process.env.FRONTEND_URL}/user/reset-password?token=${token}`;
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   await sendResetPasswordEmail(email, resetLink);
 
   return {
@@ -268,8 +268,8 @@ async function sendVerificationEmailFnc(email) {
     );
   }
 
-  const verificationLink = `${process.env.FRONTEND_URL}/user/verify-email?token=${user.emailVerificationToken}`;
-  const resendVerificationLink = `${process.env.FRONTEND_URL}/user/resend-verification-email?mail=${user.email}`;
+  const verificationLink = `${process.env.BACKEND_URL}/user/verify-email?token=${user.emailVerificationToken}`;
+  const resendVerificationLink = `${process.env.BACKEND_URL}/user/resend-verification-email?mail=${user.email}`;
   await sendVerificationEmail(
     user.email,
     verificationLink,
