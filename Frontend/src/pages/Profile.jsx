@@ -22,7 +22,7 @@ import { useAuth } from "../shared/context/AuthContext.jsx";
  * @returns {React.Component} Profile page component
  */
 const Profile = () => {
-  const { user, dispatch: authDispatch } = useAuth();
+  const { user, updateUser, isLoading } = useAuth();
 
   // State management
   const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'orders', 'addresses'
@@ -36,9 +36,9 @@ const Profile = () => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    // currentPassword: "",
+    // newPassword: "",
+    // confirmPassword: "",
   });
 
   const [profileErrors, setProfileErrors] = useState({});
@@ -80,6 +80,16 @@ const Profile = () => {
   }, [activeTab]);
 
   /**
+   * Scroll to top when component mounts or when authentication loading is complete
+   */
+  useEffect(() => {
+    // Only scroll to top when we're not loading (authentication check is complete)
+    if (!isLoading) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [isLoading]);
+
+  /**
    * Handle profile form input changes
    */
   const handleProfileChange = (e) => {
@@ -111,11 +121,11 @@ const Profile = () => {
       errors.name = "Name is required";
     }
 
-    if (!profileForm.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
-      errors.email = "Please enter a valid email";
-    }
+    // if (!profileForm.email.trim()) {
+    //   errors.email = "Email is required";
+    // } else if (!/\S+@\S+\.\S+/.test(profileForm.email)) {
+    //   errors.email = "Please enter a valid email";
+    // }
 
     if (!profileForm.phone.trim()) {
       errors.phone = "Phone number is required";
@@ -124,25 +134,25 @@ const Profile = () => {
     }
 
     // Password validation (only if changing password)
-    if (
-      profileForm.currentPassword ||
-      profileForm.newPassword ||
-      profileForm.confirmPassword
-    ) {
-      if (!profileForm.currentPassword) {
-        errors.currentPassword = "Current password is required";
-      }
+    // if (
+    //   profileForm.currentPassword ||
+    //   profileForm.newPassword ||
+    //   profileForm.confirmPassword
+    // ) {
+    //   if (!profileForm.currentPassword) {
+    //     errors.currentPassword = "Current password is required";
+    //   }
 
-      if (!profileForm.newPassword) {
-        errors.newPassword = "New password is required";
-      } else if (profileForm.newPassword.length < 6) {
-        errors.newPassword = "New password must be at least 6 characters";
-      }
+    //   if (!profileForm.newPassword) {
+    //     errors.newPassword = "New password is required";
+    //   } else if (profileForm.newPassword.length < 6) {
+    //     errors.newPassword = "New password must be at least 6 characters";
+    //   }
 
-      if (profileForm.newPassword !== profileForm.confirmPassword) {
-        errors.confirmPassword = "Passwords do not match";
-      }
-    }
+    //   if (profileForm.newPassword !== profileForm.confirmPassword) {
+    //     errors.confirmPassword = "Passwords do not match";
+    //   }
+    // }
 
     return errors;
   };
@@ -167,24 +177,24 @@ const Profile = () => {
       // Prepare update data
       const updateData = {
         name: profileForm.name,
-        email: profileForm.email,
+        // email: profileForm.email,
         phone: profileForm.phone,
       };
 
       // Add password data if changing password
-      if (profileForm.currentPassword) {
-        updateData.currentPassword = profileForm.currentPassword;
-        updateData.newPassword = profileForm.newPassword;
-      }
+      // if (profileForm.currentPassword) {
+      //   updateData.currentPassword = profileForm.currentPassword;
+      //   updateData.newPassword = profileForm.newPassword;
+      // }
 
       // Update profile
       const response = await updateUserProfile(updateData);
+      console.log(response);
 
       // Update auth context
-      authDispatch({
-        type: "UPDATE_USER",
-        payload: response.data.user,
-      });
+      updateUser(response.user);
+
+      console.log("Aaayaaa");
 
       // Show success message
       setProfileSuccess("Profile updated successfully!");
@@ -192,9 +202,9 @@ const Profile = () => {
       // Clear password fields
       setProfileForm((prev) => ({
         ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+        // currentPassword: "",
+        // newPassword: "",
+        // confirmPassword: "",
       }));
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -572,7 +582,7 @@ const Profile = () => {
                         />
                       </div>
 
-                      <div>
+                      <div className="display:block">
                         <Input
                           label="Email Address"
                           name="email"
@@ -581,6 +591,7 @@ const Profile = () => {
                           onChange={handleProfileChange}
                           error={profileErrors.email}
                           required
+                          disabled
                         />
                       </div>
 
@@ -598,7 +609,7 @@ const Profile = () => {
                     </div>
 
                     {/* Password Change Section */}
-                    <div className="border-t pt-6">
+                    {/* <div className="border-t pt-6">
                       <h3 className="text-lg font-medium text-gray-900 mb-4">
                         Change Password
                       </h3>
@@ -640,7 +651,7 @@ const Profile = () => {
                           />
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Submit Button */}
                     <div className="flex justify-end">

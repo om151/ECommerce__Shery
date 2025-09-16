@@ -95,7 +95,7 @@ export const resetPassword = async (token, data) => {
  */
 export const updateUserProfile = async (profileData) => {
   try {
-    const response = await httpClient.put("/user/profile", profileData);
+    const response = await httpClient.put("/user/edit", profileData);
     return response.data;
   } catch (error) {
     throw error;

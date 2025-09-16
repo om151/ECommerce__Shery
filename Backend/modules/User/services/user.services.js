@@ -38,9 +38,9 @@ async function authenticateUser(email, password) {
 
   if (!user)
     throw new CustomError(
-      "Invalid credentials",
-      401,
-      "InvalidCredentialsError"
+      "User Not Found",
+      404,
+      "UserNotFoundError"
     );
 
   if (user.lockUntil && user.lockUntil > Date.now()) {
