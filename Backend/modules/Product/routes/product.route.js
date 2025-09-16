@@ -113,4 +113,7 @@ router.delete(
   productController.deleteProduct
 );
 
+// --- Public: Get all products ---
+router.get("/", productController.listAllProducts);
+
 module.exports = router;

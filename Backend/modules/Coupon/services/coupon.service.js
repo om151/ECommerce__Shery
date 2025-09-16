@@ -5,10 +5,14 @@ const mongoose = require("mongoose");
 // Create Coupon
 async function createCoupon(data) {
   // Normalize possible extended JSON date objects
-  if (data.validFrom && typeof data.validFrom === 'object' && data.validFrom.$date) {
+  if (
+    data.validFrom &&
+    typeof data.validFrom === "object" &&
+    data.validFrom.$date
+  ) {
     data.validFrom = new Date(data.validFrom.$date);
   }
-  if (data.validTo && typeof data.validTo === 'object' && data.validTo.$date) {
+  if (data.validTo && typeof data.validTo === "object" && data.validTo.$date) {
     data.validTo = new Date(data.validTo.$date);
   }
   const coupon = new Coupon(data);
@@ -16,13 +20,22 @@ async function createCoupon(data) {
   return coupon;
 }
 
+// List all coupons (optionally filter)
+async function listCoupons(filter = {}) {
+  return Coupon.find(filter).sort({ createdAt: -1 }).lean();
+}
+
 // Edit Coupon
 async function editCoupon(couponId, data) {
   // Normalize possible extended JSON date objects
-  if (data.validFrom && typeof data.validFrom === 'object' && data.validFrom.$date) {
+  if (
+    data.validFrom &&
+    typeof data.validFrom === "object" &&
+    data.validFrom.$date
+  ) {
     data.validFrom = new Date(data.validFrom.$date);
   }
-  if (data.validTo && typeof data.validTo === 'object' && data.validTo.$date) {
+  if (data.validTo && typeof data.validTo === "object" && data.validTo.$date) {
     data.validTo = new Date(data.validTo.$date);
   }
   const coupon = await Coupon.findByIdAndUpdate(
@@ -44,7 +57,6 @@ async function softDeleteCoupon(couponId) {
 
   return coupon;
 }
-
 
 // Validate Coupon for an order
 async function validateCoupon({ code, userId, orderTotal, productIds = [] }) {
@@ -128,11 +140,10 @@ async function validateCoupon({ code, userId, orderTotal, productIds = [] }) {
   };
 }
 
-
 module.exports = {
   createCoupon,
   editCoupon,
   softDeleteCoupon,
   validateCoupon,
+  listCoupons,
 };
-

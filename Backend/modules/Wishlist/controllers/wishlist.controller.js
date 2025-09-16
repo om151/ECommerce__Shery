@@ -21,3 +21,9 @@ exports.removeFromWishlist = asyncHandler(async (req, res, next) => {
   const wishlist = await wishlistService.removeFromWishlist(userId, productId);
   res.status(200).json({ message: "Product removed from wishlist", wishlist });
 });
+
+exports.getMyWishlist = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const wishlist = await wishlistService.getUserWishlist(userId);
+  res.status(200).json({ success: true, wishlist });
+});

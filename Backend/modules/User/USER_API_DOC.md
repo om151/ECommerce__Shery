@@ -6,6 +6,36 @@ This document provides detailed information about the API endpoints available in
 
 ---
 
+### 0. List All Users (Admin Only)
+
+- Endpoint: `/admin/all`
+- Method: `GET`
+- Description: Returns a list of all users. Only accessible by admins.
+- Authentication: Requires valid user token and admin role.
+- Success Response (200):
+  ```json
+  {
+    "success": true,
+    "count": 42,
+    "users": [
+      {
+        "_id": "60d0fe4f5311236168a109ca",
+        "email": "john.doe@example.com",
+        "name": "John Doe",
+        "phone": "9876543210",
+        "role": "user",
+        "isActive": true,
+        "emailVerified": true,
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-05T00:00:00.000Z"
+      }
+    ]
+  }
+  ```
+- Notes: Sensitive fields such as password, tokens, wishlist, cart, addresses, and order history are excluded from the response.
+
+---
+
 ### 1. Register User
 
 - **Endpoint**: `/register`

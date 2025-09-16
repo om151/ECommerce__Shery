@@ -23,6 +23,18 @@ async function editProductService(productId, updateData, files) {
   return product;
 }
 
+// --- List All Products (non-deleted) with non-deleted variants ---
+async function listAllProductsService() {
+  const products = await Product.find({ isDeleted: { $ne: true } })
+    .populate({
+      path: "variants",
+      match: { isDeleted: { $ne: true } },
+    })
+    .lean();
+
+  return products;
+}
+
 // --- Edit Variant ---
 async function editVariantService(variantId, updateData, files) {
   const variant = await ProductVariant.findById(variantId);
@@ -193,4 +205,5 @@ module.exports = {
   addVariantToProductService,
   deleteVariantFromProductService,
   deleteProductService,
+  listAllProductsService,
 };

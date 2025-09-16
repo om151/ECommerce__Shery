@@ -6,6 +6,39 @@ All routes are prefixed with `/coupon` (or as configured in your main router).
 
 ## Coupon Endpoints
 
+### List Coupons (Admin)
+
+- URL: `/`
+- Method: `GET`
+- Auth: Admin (requires authenticated admin user)
+- Query Params (optional):
+  - `isActive`: `true` | `false` — filter by active status
+- Response: `200 OK`
+
+```json
+{
+  "coupons": [
+    {
+      "_id": "<couponId>",
+      "code": "WELCOME10",
+      "name": "Welcome 10% Off",
+      "discountType": "percentage",
+      "maxDiscount": 100,
+      "minOrderValue": 500,
+      "usageLimit": 50,
+      "usageCount": 0,
+      "validFrom": "2025-09-01T00:00:00.000Z",
+      "validTo": "2025-12-31T23:59:59.999Z",
+      "isActive": true,
+      "createdAt": "...",
+      "updatedAt": "..."
+    }
+  ]
+}
+```
+
+---
+
 ### 1. Create Coupon
 
 - **URL:** `/create`

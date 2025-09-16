@@ -140,6 +140,30 @@ This document describes the endpoints for creating and managing orders.
 
 ---
 
+### 5. Admin: List All Orders
+
+- Endpoint: `/admin/all`
+- Method: `GET`
+- Auth: Required (Bearer token, admin only)
+- Description: Returns a paginated list of all orders across users. Populates order items.
+- Query Params:
+  - `page` (optional): default 1
+  - `limit` (optional): default 10, max 100
+- Success Response (200):
+  {
+  "orders": [ { /* order */ } ],
+  "page": 1,
+  "limit": 10,
+  "total": 230,
+  "pages": 23
+  }
+- Error Responses:
+  - 401 Unauthorized: Missing/invalid token
+  - 403 Forbidden: Access denied. Admins only.
+  - 500 Internal Server Error
+
+---
+
 ### Notes
 
 - Monetary totals are computed from item snapshots and optional fees/discounts.

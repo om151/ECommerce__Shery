@@ -114,7 +114,11 @@ async function updateUserDetails(userId, data) {
       _id: { $ne: userId },
     });
     if (existing) {
-      throw new CustomError("Phone number already exists", 400, "PhoneExistsError");
+      throw new CustomError(
+        "Phone number already exists",
+        400,
+        "PhoneExistsError"
+      );
     }
   }
 
@@ -123,7 +127,8 @@ async function updateUserDetails(userId, data) {
     runValidators: true,
   });
 
-  if (!updatedUser) throw new CustomError("User not found", 404, "UserNotFound");
+  if (!updatedUser)
+    throw new CustomError("User not found", 404, "UserNotFound");
 
   return updatedUser;
 }
@@ -282,4 +287,27 @@ module.exports = {
   handleResetPassword,
   handleVerifyEmail,
   sendVerificationEmailFnc,
+  listAllUsers,
 };
+
+// Admin: list all users with safe projection
+async function listAllUsers() {
+  const projection = {
+    password: 0,
+    addresses: 0,
+    wishlist: 0,
+    cart: 0,
+    orderHistory: 0,
+    resetPasswordToken: 0,
+    resetPasswordExpires: 0,
+    emailVerificationToken: 0,
+    emailVerificationExpires: 0,
+    __v: 0,
+  };
+
+  const users = await userModel
+    .find({}, projection)
+    .sort({ createdAt: -1 })
+    .lean();
+  return users;
+}

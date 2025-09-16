@@ -13,6 +13,7 @@ const {
   updateUserDetails,
 } = require("../services/user.services");
 const asyncHandler = require("../../../utils/asyncHandler");
+const adminAuthMiddleware = require("../../../middleware/adminAuth.middleware");
 
 const registerUser = asyncHandler(async (req, res) => {
   const error = validationResult(req);
@@ -117,10 +118,16 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   const updatedUser = await updateUserDetails(req.user._id, req.body);
-  
+
   return res
     .status(200)
     .json({ user: updatedUser, message: "Profile updated successfully" });
+});
+
+// Admin: list all users
+const listAllUsersAdmin = asyncHandler(async (req, res) => {
+  const users = await require("../services/user.services").listAllUsers();
+  res.status(200).json({ success: true, count: users.length, users });
 });
 
 module.exports = {
@@ -133,4 +140,5 @@ module.exports = {
   verifyEmail,
   resendVerificationEmail,
   updateUser,
+  listAllUsersAdmin,
 };

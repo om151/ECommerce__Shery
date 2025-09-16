@@ -12,6 +12,15 @@ All routes are prefixed with `/product` (or as configured in your main router).
 
 ## Endpoints
 
+### 0. Get All Products (Public)
+
+- URL: `/`
+- Method: `GET`
+- Middleware: None
+- Description: Returns all non-deleted products with their non-deleted variants populated.
+- Query Params: None
+- Response: `{ success: true, count: number, products: Product[] }`
+
 ### 1. Add Product with Variants
 
 - **URL:** `/add`

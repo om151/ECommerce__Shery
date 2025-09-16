@@ -10,6 +10,7 @@ const {
   addProductWithVariantsService,
   deleteVariantFromProductService,
   deleteProductService,
+  listAllProductsService,
 } = require("../services/product.service");
 
 // Edit Product
@@ -122,4 +123,10 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
     message:
       "Product, its variants, inventories, and reviews deleted successfully",
   });
+});
+
+// Get All Products (public)
+exports.listAllProducts = asyncHandler(async (req, res) => {
+  const products = await listAllProductsService();
+  res.status(200).json({ success: true, count: products.length, products });
 });

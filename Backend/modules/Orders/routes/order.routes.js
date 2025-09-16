@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../../../middleware/auth.middleware");
+const adminMiddleware = require("../../../middleware/adminAuth.middleware");
 const {
   createOrder,
   updateShippingAddress,
   cancelOrderController,
   listOrdersController,
+  listAllOrdersController,
 } = require("../controllers/order.controller");
 const {
   validateCreateOrder,
@@ -34,5 +36,13 @@ router.put(
 
 // List orders for authenticated user
 router.get("/", authMiddleware, listOrdersController);
+
+// Admin: list all orders (paginated)
+router.get(
+  "/admin/all",
+  authMiddleware,
+  adminMiddleware,
+  listAllOrdersController
+);
 
 module.exports = router;

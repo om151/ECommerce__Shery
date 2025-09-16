@@ -5,6 +5,7 @@ const {
   updateOrderShippingAddress,
   cancelOrder,
   listUserOrders,
+  listAllOrders,
 } = require("../services/order.service");
 
 const createOrder = asyncHandler(async (req, res) => {
@@ -59,3 +60,11 @@ const listOrdersController = asyncHandler(async (req, res) => {
 
 module.exports.cancelOrderController = cancelOrderController;
 module.exports.listOrdersController = listOrdersController;
+
+const listAllOrdersController = asyncHandler(async (req, res) => {
+  const { page, limit } = req.query;
+  const result = await listAllOrders({ page, limit });
+  return res.status(200).json(result);
+});
+
+module.exports.listAllOrdersController = listAllOrdersController;

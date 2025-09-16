@@ -13,6 +13,9 @@ const adminMiddleware = require("../../../middleware/adminAuth.middleware");
 
 const couponUsageController = require("../controllers/couponUsage.controller");
 
+// List Coupons (admin)
+router.get("/", authMiddleware, adminMiddleware, couponController.listCoupons);
+
 // Create Coupon
 router.post(
   "/create",

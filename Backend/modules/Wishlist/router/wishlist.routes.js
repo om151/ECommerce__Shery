@@ -8,7 +8,12 @@ const {
 const authMiddleware = require("../../../middleware/auth.middleware");
 
 // Add product to wishlist
-router.post("/add", authMiddleware, validateAddToWishlist, wishlistController.addToWishlist);
+router.post(
+  "/add",
+  authMiddleware,
+  validateAddToWishlist,
+  wishlistController.addToWishlist
+);
 
 // Remove product from wishlist
 router.post(
@@ -17,5 +22,8 @@ router.post(
   validateRemoveFromWishlist,
   wishlistController.removeFromWishlist
 );
+
+// Get my wishlist
+router.get("/", authMiddleware, wishlistController.getMyWishlist);
 
 module.exports = router;

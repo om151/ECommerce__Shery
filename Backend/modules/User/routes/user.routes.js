@@ -13,6 +13,7 @@ const {
   updateUser,
 } = require("../controllers/user.controller");
 const authMiddleware = require("../../../middleware/auth.middleware");
+const adminAuthMiddleware = require("../../../middleware/adminAuth.middleware");
 const {
   validateRegister,
   validateLogin,
@@ -20,6 +21,7 @@ const {
   validateResetPassword,
   validateEditUser,
 } = require("../validation/user.validation");
+const { listAllUsersAdmin } = require("../controllers/user.controller");
 
 router.post("/register", validateRegister, registerUser);
 
@@ -39,5 +41,13 @@ router.get(
 
 // Edit user details
 router.put("/edit", authMiddleware, validateEditUser, updateUser);
+
+// Admin: Get all users
+router.get(
+  "/admin/all",
+  authMiddleware,
+  adminAuthMiddleware,
+  listAllUsersAdmin
+);
 
 module.exports = router;
