@@ -1,0 +1,77 @@
+/* 
+  Main CSS file - imports Tailwind CSS and defines global styles
+  This file is imported in main.jsx and applies styles to entire app
+*/
+
+/* Import Tailwind CSS base styles - resets and base element styles */
+@tailwind base;
+
+/* Import Tailwind CSS component styles - reusable component classes */
+@tailwind components;
+
+/* Import Tailwind CSS utility classes - all utility classes like p-4, text-red-500 */
+@tailwind utilities;
+
+/* Custom base styles that apply globally */
+@layer base {
+  /* Set default font smoothing for better text rendering */
+  * {
+    @apply antialiased;
+  }
+  
+  /* Body styles - default font and background */
+  body {
+    @apply font-sans bg-gray-50 text-gray-900;
+  }
+  
+  /* Heading styles using custom font family */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
+  }
+}
+
+/* Custom component styles that can be reused */
+@layer components {
+  /* Button base styles - can be extended with variants */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  /* Primary button variant */
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+  
+  /* Secondary button variant */
+  .btn-secondary {
+    @apply bg-secondary-100 text-secondary-700 hover:bg-secondary-200 focus:ring-secondary-500;
+  }
+  
+  /* Input field base styles */
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  }
+  
+  /* Card component styles */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  /* Text shadow utilities */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
