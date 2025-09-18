@@ -379,6 +379,7 @@ async function listAllOrders({ page = 1, limit = 10 } = {}) {
       .skip(skip)
       .limit(limit)
       .populate("items")
+      .populate("userId", "name email")
       .lean(),
     Order.countDocuments({}),
   ]);

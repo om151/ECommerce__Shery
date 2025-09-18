@@ -31,11 +31,11 @@ exports.validateCoupon = asyncHandler(async (req, res, next) => {
 });
 
 exports.listCoupons = asyncHandler(async (req, res, next) => {
-  const { isActive } = req.query;
+  const { isActive, page = 1, limit = 10 } = req.query;
   const filter = {};
   if (isActive !== undefined) {
     filter.isActive = String(isActive).toLowerCase() === "true";
   }
-  const coupons = await couponService.listCoupons(filter);
-  res.status(200).json({ coupons });
+  const result = await couponService.listCoupons(filter, page, limit);
+  res.status(200).json(result);
 });

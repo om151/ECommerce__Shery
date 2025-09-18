@@ -20,9 +20,27 @@ async function createCoupon(data) {
   return coupon;
 }
 
-// List all coupons (optionally filter)
-async function listCoupons(filter = {}) {
-  return Coupon.find(filter).sort({ createdAt: -1 }).lean();
+// List all coupons (optionally filter) with pagination
+async function listCoupons(filter = {}, page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+
+  const coupons = await Coupon.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
+    .lean();
+
+  const total = await Coupon.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    coupons,
+    total,
+    currentPage: parseInt(page),
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
 }
 
 // Edit Coupon

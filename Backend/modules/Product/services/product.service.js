@@ -23,16 +23,39 @@ async function editProductService(productId, updateData, files) {
   return product;
 }
 
-// --- List All Products (non-deleted) with non-deleted variants ---
-async function listAllProductsService() {
-  const products = await Product.find({ isDeleted: { $ne: true } })
+// --- List All Products (non-deleted) with non-deleted variants and pagination ---
+async function listAllProductsService(page = 1, limit = 10, isAdmin = false) {
+  const skip = (page - 1) * limit;
+
+  // Base query - exclude deleted products
+  const baseQuery = { isDeleted: { $ne: true } };
+
+  const products = await Product.find(baseQuery)
     .populate({
       path: "variants",
       match: { isDeleted: { $ne: true } },
+      populate: {
+        path: "inventoryId",
+        model: "Inventory",
+      },
     })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
     .lean();
 
-  return products;
+  // Get total count for pagination
+  const total = await Product.countDocuments(baseQuery);
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    products,
+    total,
+    currentPage: parseInt(page),
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
 }
 
 // --- Edit Variant ---

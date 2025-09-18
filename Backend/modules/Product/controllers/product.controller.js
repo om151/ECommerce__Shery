@@ -125,8 +125,12 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   });
 });
 
-// Get All Products (public)
+// Get All Products (public) with pagination
 exports.listAllProducts = asyncHandler(async (req, res) => {
-  const products = await listAllProductsService();
-  res.status(200).json({ success: true, count: products.length, products });
+  const { page = 1, limit = 10 } = req.query;
+  const result = await listAllProductsService(page, limit);
+  res.status(200).json({
+    success: true,
+    ...result,
+  });
 });
