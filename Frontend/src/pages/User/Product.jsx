@@ -3,11 +3,12 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getProductById, getProductReviews } from "../shared/api/apiService.js";
-import Button from "../shared/components/Button.jsx";
-import LoadingSpinner from "../shared/components/LoadingSpinner.jsx";
-import { useAuth } from "../shared/context/AuthContext.jsx";
-import { useCart } from "../shared/context/CartContext.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
+import { getProductById } from "../../shared/api/User/getProduct.apiService.js";
+import { getProductReviews } from "../../shared/api/User/review.apiService.js";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 
 /**
  * Product detail page component
@@ -16,7 +17,7 @@ import { useCart } from "../shared/context/CartContext.jsx";
 const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const { user } = useAuth();
 
   // Product data state
@@ -74,8 +75,8 @@ const Product = () => {
     setAddingToCart(true);
 
     try {
-      // Use the context function to add item
-      await addItem(product._id, null, quantity); // variantId is null for now
+      // Use the Redux action to add item
+      await addToCart({ productId: product._id, quantity }); // Updated for Redux
 
       // Show success message (you can customize this)
       alert(`${product.name} added to cart!`);
@@ -98,7 +99,7 @@ const Product = () => {
 
     // Add to cart first
     try {
-      await addItem(product._id, null, quantity);
+      await addToCart({ productId: product._id, quantity });
     } catch (error) {
       console.error("Error adding to cart:", error);
       alert("Failed to add product to cart");

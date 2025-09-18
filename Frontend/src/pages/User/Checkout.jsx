@@ -3,16 +3,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  applyCoupon,
-  createOrder,
-  getUserAddresses,
-} from "../shared/api/apiService.js";
-import Button from "../shared/components/Button.jsx";
-import Input from "../shared/components/Input.jsx";
-import LoadingSpinner from "../shared/components/LoadingSpinner.jsx";
-import { useAuth } from "../shared/context/AuthContext.jsx";
-import { useCart } from "../shared/context/CartContext.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../../Components/Common/Input.jsx";
+import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useAddresses } from "../../store/Hooks/User/hook.useAddress.js";
+import { useCart } from "../../store/Hooks/User/hook.useCart.js";
+import { useOrders } from "../../store/Hooks/User/hook.useOrder.js";
 
 /**
  * Checkout page component
@@ -22,6 +19,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, clearCart } = useCart();
   const { user } = useAuth();
+  const {
+    list: addresses,
+    isLoading: addressesLoading,
+    fetchAddresses,
+  } = useAddresses();
+  const { createOrder, isLoading: orderLoading } = useOrders();
 
   // Redirect if not logged in
   useEffect(() => {
@@ -32,10 +35,7 @@ const Checkout = () => {
 
   // Form states
   const [currentStep, setCurrentStep] = useState(1); // 1: Shipping, 2: Payment, 3: Review
-  const [loading, setLoading] = useState(false);
-  const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Shipping form
   const [shippingForm, setShippingForm] = useState({
@@ -65,27 +65,30 @@ const Checkout = () => {
 
   // Load user addresses
   useEffect(() => {
-    const fetchAddresses = async () => {
+    const loadAddresses = async () => {
       if (!user) return;
 
       try {
-        setLoading(true);
-        const response = await getUserAddresses();
-        setAddresses(response.data.addresses || []);
+        await fetchAddresses();
 
         // Select first address as default
-        if (response.data.addresses?.length > 0) {
-          setSelectedAddressId(response.data.addresses[0]._id);
+        if (addresses?.length > 0) {
+          setSelectedAddressId(addresses[0]._id);
         }
       } catch (error) {
         console.error("Error fetching addresses:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchAddresses();
-  }, [user]);
+    loadAddresses();
+  }, [user, fetchAddresses]);
+
+  // Update selected address when addresses are loaded
+  useEffect(() => {
+    if (addresses?.length > 0 && !selectedAddressId) {
+      setSelectedAddressId(addresses[0]._id);
+    }
+  }, [addresses, selectedAddressId]);
 
   // Calculate totals - provide fallback for items
   const cartItems = items || [];
@@ -137,24 +140,29 @@ const Checkout = () => {
 
   /**
    * Apply coupon code
+   * TODO: Implement coupon functionality in Redux
    */
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
 
-    setApplyingCoupon(true);
-    setCouponError("");
+    // setApplyingCoupon(true);
+    // setCouponError("");
 
-    try {
-      const response = await applyCoupon(couponCode, subtotal);
-      setCouponDiscount(response.data.discount);
-      setCouponError("");
-    } catch (error) {
-      console.error("Error applying coupon:", error);
-      setCouponError(error.response?.data?.message || "Invalid coupon code");
-      setCouponDiscount(0);
-    } finally {
-      setApplyingCoupon(false);
-    }
+    // TODO: Implement applyCoupon in Redux
+    console.warn("Coupon functionality not yet implemented in Redux");
+    setCouponError("Coupon functionality temporarily disabled");
+
+    // try {
+    //   const response = await applyCoupon(couponCode, subtotal);
+    //   setCouponDiscount(response.data.discount);
+    //   setCouponError("");
+    // } catch (error) {
+    //   console.error("Error applying coupon:", error);
+    //   setCouponError(error.response?.data?.message || "Invalid coupon code");
+    //   setCouponDiscount(0);
+    // } finally {
+    //   setApplyingCoupon(false);
+    // }
   };
 
   /**
@@ -200,8 +208,6 @@ const Checkout = () => {
    * Submit order
    */
   const handleSubmitOrder = async () => {
-    setIsSubmitting(true);
-
     try {
       // Prepare shipping address
       let shippingAddress;
@@ -231,24 +237,21 @@ const Checkout = () => {
         couponCode: couponCode || undefined,
       };
 
-      // Create order
-      const response = await createOrder(orderData);
+      // Create order using Redux dispatcher
+      const result = await createOrder(orderData);
 
-      // Clear cart
-      clearCart();
+      if (result.type === "orders/createOrder/fulfilled") {
+        // Clear cart
+        clearCart();
 
-      // Navigate to order confirmation
-      navigate(`/order-confirmation/${response.data.order._id}`, {
-        state: { order: response.data.order },
-      });
+        // Navigate to order confirmation
+        navigate(`/order-confirmation/${result.payload.order._id}`, {
+          state: { order: result.payload.order },
+        });
+      }
     } catch (error) {
       console.error("Error creating order:", error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to create order. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
+      alert("Failed to create order. Please try again.");
     }
   };
 
@@ -269,7 +272,7 @@ const Checkout = () => {
     );
   }
 
-  if (loading) {
+  if (addressesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -774,10 +777,10 @@ const Checkout = () => {
                   <Button
                     variant="primary"
                     onClick={handleSubmitOrder}
-                    loading={isSubmitting}
-                    disabled={isSubmitting}
+                    loading={orderLoading}
+                    disabled={orderLoading}
                   >
-                    {isSubmitting ? "Placing Order..." : "Place Order"}
+                    {orderLoading ? "Placing Order..." : "Place Order"}
                   </Button>
                 )}
               </div>

@@ -2,8 +2,8 @@
 // This component handles both creation and editing of user addresses
 
 import React, { useEffect, useState } from "react";
-import Button from "./Button.jsx";
-import Input from "./Input.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../Common/Input.jsx";
 
 /**
  * AddressForm component

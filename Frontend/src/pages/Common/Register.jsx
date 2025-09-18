@@ -1,33 +1,32 @@
-// Login Page - User authentication form
-// This page allows users to sign in to their accounts
+// Register Page - User registration form
+// This page allows new users to create accounts
 
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Button from "../shared/components/Button.jsx";
-import Input from "../shared/components/Input.jsx";
-import { useAuth } from "../shared/context/AuthContext.jsx";
+import { Link, useNavigate } from "react-router-dom";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../../Components/Common/Input.jsx";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 
 /**
- * Login page component with authentication form
- * @returns {React.Component} Login page component
+ * Register page component with registration form
+ * @returns {React.Component} Register page component
  */
-const Login = () => {
-  // Get auth context and navigation
-  const { login, isLoading, error, clearError } = useAuth();
+const Register = () => {
+  // Get auth state and actions from Redux
+  const { isLoading, error, register, clearAuthError } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Get the page user was trying to access before login
-  const from = location.state?.from || "/";
-
-  // Get success message from navigation state (e.g., from password reset)
-  const successMessage = location.state?.message;
 
   // Form state
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
+    phone: "",
     password: "",
+    confirmPassword: "",
   });
+
+  // Success message state (local to this component)
+  const [success, setSuccess] = useState("");
 
   // Form validation errors
   const [formErrors, setFormErrors] = useState({});
@@ -53,10 +52,9 @@ const Login = () => {
       }));
     }
 
-    // Clear global error
-    if (error) {
-      clearError();
-    }
+    // Clear global error/success messages
+    if (error) clearAuthError();
+    if (success) setSuccess("");
   };
 
   /**
@@ -66,6 +64,13 @@ const Login = () => {
   const validateForm = () => {
     const errors = {};
 
+    // Name validation
+    if (!formData.name) {
+      errors.name = "Name is required";
+    } else if (formData.name.length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    }
+
     // Email validation
     if (!formData.email) {
       errors.email = "Email is required";
@@ -73,11 +78,25 @@ const Login = () => {
       errors.email = "Please enter a valid email address";
     }
 
+    // Phone validation
+    if (!formData.phone) {
+      errors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      errors.phone = "Please enter a valid 10-digit phone number";
+    }
+
     // Password validation
     if (!formData.password) {
       errors.password = "Password is required";
     } else if (formData.password.length < 6) {
       errors.password = "Password must be at least 6 characters";
+    }
+
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
     }
 
     return errors;
@@ -97,15 +116,48 @@ const Login = () => {
       return;
     }
 
-    try {
-      // Attempt login
-      await login(formData);
+    setSuccess("");
 
-      // Redirect to intended page or home
-      navigate(from, { replace: true });
+    try {
+      // Prepare data for API (exclude confirmPassword)
+      const registrationData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      };
+
+      // Call registration Redux action
+      const result = await register(registrationData);
+
+      if (result.type === "auth/register/fulfilled") {
+        // Show success message
+        setSuccess(
+          "Registration successful! Please check your email to verify your account."
+        );
+
+        // Clear form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+        });
+
+        // Redirect to login after a delay
+        setTimeout(() => {
+          navigate("/login", {
+            state: {
+              message:
+                "Registration successful! Please verify your email and then log in.",
+            },
+          });
+        }, 3000);
+      }
     } catch (error) {
-      // Error handling is done in the auth context
-      console.error("Login failed:", error);
+      console.error("Registration error:", error);
+      // Error handling is done in Redux slice
     }
   };
 
@@ -132,15 +184,15 @@ const Login = () => {
             </div>
           </Link>
           <h2 className="text-3xl font-bold font-heading text-gray-900">
-            Sign in to your account
+            Create your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              to="/register"
+              to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              Sign up here
+              Sign in here
             </Link>
           </p>
         </div>
@@ -148,10 +200,10 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="card p-6 sm:p-8">
-          {/* Login Form */}
+          {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Success Message */}
-            {successMessage && (
+            {success && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex">
                   <svg
@@ -168,9 +220,10 @@ const Login = () => {
                     />
                   </svg>
                   <div>
-                    <p className="text-sm font-medium text-green-800">
-                      {successMessage}
-                    </p>
+                    <h3 className="text-sm font-medium text-green-800">
+                      Success!
+                    </h3>
+                    <p className="text-sm text-green-700 mt-1">{success}</p>
                   </div>
                 </div>
               </div>
@@ -195,13 +248,28 @@ const Login = () => {
                   </svg>
                   <div>
                     <h3 className="text-sm font-medium text-red-800">
-                      Login Failed
+                      Registration Failed
                     </h3>
                     <p className="text-sm text-red-700 mt-1">{error}</p>
                   </div>
                 </div>
               </div>
             )}
+
+            {/* Name Field */}
+            <div>
+              <Input
+                type="text"
+                name="name"
+                label="Full Name"
+                value={formData.name}
+                onChange={handleInputChange}
+                error={formErrors.name}
+                required
+                placeholder="Enter your full name"
+                disabled={isLoading}
+              />
+            </div>
 
             {/* Email Field */}
             <div>
@@ -218,6 +286,22 @@ const Login = () => {
               />
             </div>
 
+            {/* Phone Field */}
+            <div>
+              <Input
+                type="tel"
+                name="phone"
+                label="Phone Number"
+                value={formData.phone}
+                onChange={handleInputChange}
+                error={formErrors.phone}
+                required
+                placeholder="Enter your 10-digit phone number"
+                disabled={isLoading}
+                maxLength={10}
+              />
+            </div>
+
             {/* Password Field */}
             <div>
               <Input
@@ -228,35 +312,55 @@ const Login = () => {
                 onChange={handleInputChange}
                 error={formErrors.password}
                 required
-                placeholder="Enter your password"
+                placeholder="Create a password (min. 6 characters)"
                 disabled={isLoading}
               />
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
+            {/* Confirm Password Field */}
+            <div>
+              <Input
+                type="password"
+                name="confirmPassword"
+                label="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                error={formErrors.confirmPassword}
+                required
+                placeholder="Confirm your password"
+                disabled={isLoading}
+              />
+            </div>
 
-              <div className="text-sm">
-                <Link
-                  to="/forgot-password"
-                  className="font-medium text-primary-600 hover:text-primary-500"
-                >
-                  Forgot your password?
-                </Link>
+            {/* Terms and Conditions */}
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  required
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="terms" className="text-gray-900">
+                  I agree to the{" "}
+                  <Link
+                    to="/terms"
+                    className="font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    Terms and Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    to="/privacy"
+                    className="font-medium text-primary-600 hover:text-primary-500"
+                  >
+                    Privacy Policy
+                  </Link>
+                </label>
               </div>
             </div>
 
@@ -270,12 +374,12 @@ const Login = () => {
                 loading={isLoading}
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </div>
           </form>
 
-          {/* Social Login Section (Optional) */}
+          {/* Alternative Login Methods */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -283,13 +387,13 @@ const Login = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Or continue with
+                  Or register with
                 </span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {/* Google Login Button */}
+              {/* Google Register Button */}
               <button
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -316,7 +420,7 @@ const Login = () => {
                 <span className="ml-2">Google</span>
               </button>
 
-              {/* Facebook Login Button */}
+              {/* Facebook Register Button */}
               <button
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
@@ -339,4 +443,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

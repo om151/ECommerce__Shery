@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { resetPassword } from "../shared/api/apiService.js";
-import Button from "../shared/components/Button.jsx";
-import Input from "../shared/components/Input.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../../Components/Common/Input.jsx";
+import { resetPassword } from "../../shared/api/Common/auth.apiServices.js";
 
 /**
  * ResetPassword page component

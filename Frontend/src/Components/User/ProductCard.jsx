@@ -3,9 +3,9 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-import { useCart } from "../context/CartContext.jsx";
-import Button from "./Button.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 
 /**
  * ProductCard component for displaying product information
@@ -22,7 +22,7 @@ import Button from "./Button.jsx";
  */
 const ProductCard = ({ product, className = "", ...props }) => {
   // Get cart and auth context
-  const { addItem, isLoading: cartLoading } = useCart();
+  const { addToCart, isLoading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
 
   // Handle case where product is null/undefined
@@ -69,7 +69,7 @@ const ProductCard = ({ product, className = "", ...props }) => {
 
     try {
       // Add item to cart with default quantity of 1
-      await addItem({
+      await addToCart({
         productId: product._id,
         variantId: defaultVariant._id,
         quantity: 1,

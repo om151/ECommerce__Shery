@@ -3,8 +3,8 @@
 
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-import { useCart } from "../context/CartContext.jsx";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 import Button from "./Button.jsx";
 
 /**
@@ -12,8 +12,8 @@ import Button from "./Button.jsx";
  * @returns {React.Component} Header component
  */
 const Header = () => {
-  // Get auth and cart state from context
-  const { user, isAuthenticated, logout } = useAuth();
+  // Get auth and cart state from Redux
+  const { user, isAuthenticated, isAdmin, logoutUser } = useAuth();
   const { itemCount } = useCart();
 
   // Navigation and routing
@@ -29,7 +29,7 @@ const Header = () => {
    */
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutUser();
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -174,6 +174,16 @@ const Header = () => {
             {/* User Authentication */}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
+                {/* Admin Panel Link - Only show for admin users */}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1 rounded-md"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+
                 {/* User Profile */}
                 <Link
                   to="/profile"
@@ -298,6 +308,17 @@ const Header = () => {
               {/* Mobile Authentication */}
               {isAuthenticated ? (
                 <div className="space-y-2 pt-2 border-t border-gray-200">
+                  {/* Admin Panel Link - Only show for admin users */}
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-blue-600 bg-blue-50"
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
+
                   <Link
                     to="/profile"
                     onClick={() => setIsMenuOpen(false)}

@@ -3,9 +3,9 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../shared/components/Button.jsx";
-import { useAuth } from "../shared/context/AuthContext.jsx";
-import { useCart } from "../shared/context/CartContext.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 
 /**
  * Cart page component
@@ -13,13 +13,8 @@ import { useCart } from "../shared/context/CartContext.jsx";
  */
 const Cart = () => {
   const navigate = useNavigate();
-  const {
-    items,
-    updateItem,
-    removeItem,
-    clearCart: contextClearCart,
-    isLoading,
-  } = useCart();
+  const { items, updateQuantity, removeFromCart, clearCart, isLoading } =
+    useCart();
   const { user } = useAuth();
 
   /**
@@ -27,15 +22,15 @@ const Cart = () => {
    * @param {string} productId - Product ID
    * @param {number} newQuantity - New quantity
    */
-  const updateQuantity = (productId, newQuantity) => {
+  const handleUpdateQuantity = (productId, newQuantity) => {
     if (newQuantity <= 0) {
       // Remove item if quantity is 0 or less
       handleRemoveItem(productId);
       return;
     }
 
-    // Use the context function to update item
-    updateItem(productId, null, newQuantity); // variantId is null for now
+    // Use the Redux action to update item
+    updateQuantity({ productId, quantity: newQuantity });
   };
 
   /**
@@ -43,16 +38,16 @@ const Cart = () => {
    * @param {string} productId - Product ID to remove
    */
   const handleRemoveItem = (productId) => {
-    // Use the context function to remove item
-    removeItem(productId, null); // variantId is null for now
+    // Use the Redux action to remove item
+    removeFromCart({ productId });
   };
 
   /**
    * Clear all items from cart
    */
-  const clearCart = () => {
+  const handleClearCart = () => {
     if (window.confirm("Are you sure you want to clear your cart?")) {
-      contextClearCart();
+      clearCart();
     }
   };
 
@@ -251,7 +246,7 @@ const Cart = () => {
                                 type="button"
                                 className="px-3 py-1 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={() =>
-                                  updateQuantity(
+                                  handleUpdateQuantity(
                                     item.product?._id || item.productId,
                                     item.quantity - 1
                                   )
@@ -267,7 +262,7 @@ const Cart = () => {
                                 type="button"
                                 className="px-3 py-1 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={() =>
-                                  updateQuantity(
+                                  handleUpdateQuantity(
                                     item.product?._id || item.productId,
                                     item.quantity + 1
                                   )
@@ -293,7 +288,9 @@ const Cart = () => {
                             {/* Remove Button */}
                             <button
                               onClick={() =>
-                                removeItem(item.product?._id || item.productId)
+                                handleRemoveItem(
+                                  item.product?._id || item.productId
+                                )
                               }
                               className="flex items-center text-sm text-red-600 hover:text-red-800 font-medium"
                             >

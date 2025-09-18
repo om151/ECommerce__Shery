@@ -1,102 +1,114 @@
-// App.jsx - Main application component with routing and global providers
-// This is the root component that sets up routing and global state
+// App.jsx - Main application component with routing
+// This is the root component that sets up routing
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
-// Import context providers
-import { AuthProvider } from "./shared/context/AuthContext.jsx";
-import { CartProvider } from "./shared/context/CartContext.jsx";
-
 // Import layout components
-import Footer from "./shared/components/Footer.jsx";
-import Header from "./shared/components/Header.jsx";
+import Footer from "./Components/Common/Footer.jsx";
+import Header from "./Components/Common/Header.jsx";
 
 // Import page components
-import Cart from "./pages/Cart.jsx";
-import Checkout from "./pages/Checkout.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
-import Home from "./pages/Home.jsx";
-import Login from "./pages/Login.jsx";
-import Product from "./pages/Product.jsx";
-import Profile from "./pages/Profile.jsx";
-import Register from "./pages/Register.jsx";
-import ResetPassword from "./pages/ResetPassword.jsx";
+import AdminPanel from "./pages/Admin/AdminPanel.jsx";
+import Cart from "./pages/User/Cart.jsx";
+import Checkout from "./pages/User/Checkout.jsx";
+import Login from "./pages/Common/Login.jsx";
+import Profile from "./pages/Common/Profile.jsx";
+import ForgotPassword from "./pages/Common/ForgotPassword.jsx";
+import Product from "./pages/User/Product.jsx";
+import Register from "./pages/Common/Register.jsx";
+import ResetPassword from "./pages/Common/ResetPassword.jsx";
+import Home from "./pages/User/Home.jsx";
 
-// Import route protection component
-import ProtectedRoute from "./shared/components/ProtectedRoute.jsx";
+// Import route protection components
+import AdminProtectedRoute from "./utils/AdminProtectedRoute.jsx";
+import ProtectedRoute from "./utils/ProtectedRoute.jsx";
+
+// Import app initialization hook
+import { useAppInit } from "./store/Hooks/User/hook.useAppInit.js";
 
 /**
- * Main App component - Sets up routing and global providers
+ * Main App component - Sets up routing
  * @returns {React.Component} App component
  */
 function App() {
+  const { initializeApp } = useAppInit();
+
+  // Initialize app on mount
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
   return (
     // Router provides routing functionality to entire app
     <Router>
-      {/* AuthProvider manages global authentication state */}
-      <AuthProvider>
-        {/* CartProvider manages global cart state */}
-        <CartProvider>
-          {/* Main app layout */}
-          <div className="min-h-screen flex flex-col">
-            {/* Header - Navigation and user actions */}
-            <Header />
+      {/* Main app layout */}
+      <div className="min-h-screen flex flex-col">
+        {/* Header - Navigation and user actions */}
+        <Header />
 
-            {/* Main content area - Pages will render here */}
-            <main className="flex-1">
-              <Routes>
-                {/* Public routes - accessible to all users */}
-                <Route path="/" element={<Home />} />
-                <Route path="/product/:id" element={<Product />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/cart" element={<Cart />} />
+        {/* Main content area - Pages will render here */}
+        <main className="flex-1">
+          <Routes>
+            {/* Public routes - accessible to all users */}
+            <Route path="/" element={<Home />} />
+            <Route path="/product/:id" element={<Product />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/cart" element={<Cart />} />
 
-                {/* Protected routes - require authentication */}
-                <Route
-                  path="/checkout"
-                  element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
+            {/* Protected routes - require authentication */}
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
-                {/* Catch-all route for 404 Not Found */}
-                <Route
-                  path="*"
-                  element={
-                    <div className="min-h-screen flex items-center justify-center">
-                      <div className="text-center">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                          404 - Page Not Found
-                        </h1>
-                        <p className="text-gray-600">
-                          The page you're looking for doesn't exist.
-                        </p>
-                      </div>
-                    </div>
-                  }
-                />
-              </Routes>
-            </main>
+            {/* Admin routes - require admin role */}
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminPanel />
+                </AdminProtectedRoute>
+              }
+            />
 
-            {/* Footer - Site information and links */}
-            <Footer />
-          </div>
-        </CartProvider>
-      </AuthProvider>
+            {/* Catch-all route for 404 Not Found */}
+            <Route
+              path="*"
+              element={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                      404 - Page Not Found
+                    </h1>
+                    <p className="text-gray-600">
+                      The page you're looking for doesn't exist.
+                    </p>
+                  </div>
+                </div>
+              }
+            />
+          </Routes>
+        </main>
+
+        {/* Footer - Site information and links */}
+        <Footer />
+      </div>
     </Router>
   );
 }

@@ -3,8 +3,8 @@
 
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-import LoadingSpinner from "./LoadingSpinner.jsx";
+import LoadingSpinner from "../Components/Common/LoadingSpinner"
+import { useAuth } from "../store/Hooks/Common/hook.useAuth";
 
 /**
  * ProtectedRoute component that requires authentication
@@ -13,7 +13,7 @@ import LoadingSpinner from "./LoadingSpinner.jsx";
  * @returns {React.Component} Protected route component
  */
 const ProtectedRoute = ({ children }) => {
-  // Get authentication state from context
+  // Get authentication state from Redux
   const { isAuthenticated, isLoading } = useAuth();
 
   // Get current location to redirect back after login

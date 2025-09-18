@@ -3,33 +3,35 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  createAddress,
-  deleteAddress,
-  getUserAddresses,
-  getUserOrders,
-  updateAddress,
-  updateUserProfile,
-} from "../shared/api/apiService.js";
-import AddressForm from "../shared/components/AddressForm.jsx";
-import Button from "../shared/components/Button.jsx";
-import Input from "../shared/components/Input.jsx";
-import LoadingSpinner from "../shared/components/LoadingSpinner.jsx";
-import { useAuth } from "../shared/context/AuthContext.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../../Components/Common/Input.jsx";
+import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
+import AddressForm from "../../Components/User/AddressForm.jsx";
+
+import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useAddresses } from "../../store/Hooks/User/hook.useAddress.js";
+import { useOrders } from "../../store/Hooks/User/hook.useOrder.js";
 
 /**
  * Profile page component
  * @returns {React.Component} Profile page component
  */
 const Profile = () => {
-  const { user, updateUser, isLoading } = useAuth();
+  const { user, isLoading, updateUserProfile } = useAuth();
+  const { orders, isLoading: ordersLoading, fetchOrders } = useOrders();
+  const {
+    addresses,
+    isLoading: addressesLoading,
+    fetchAddresses,
+    createAddress,
+    updateAddress,
+    deleteAddress,
+    error: addressError,
+  } = useAddresses();
 
   // State management
   const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'orders', 'addresses'
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [orders, setOrders] = useState([]);
-  const [addresses, setAddresses] = useState([]);
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -48,7 +50,6 @@ const Profile = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [addressFormLoading, setAddressFormLoading] = useState(false);
-  const [addressErrors, setAddressErrors] = useState({});
   const [addressSuccess, setAddressSuccess] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
@@ -57,22 +58,16 @@ const Profile = () => {
    */
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-
       try {
         if (activeTab === "profile") {
-          // Profile data is already in context
+          // Profile data is already in Redux state
         } else if (activeTab === "orders") {
-          const response = await getUserOrders();
-          setOrders(response.data.orders || []);
+          await fetchOrders();
         } else if (activeTab === "addresses") {
-          const response = await getUserAddresses();
-          setAddresses(response.data.addresses || []);
+          await fetchAddresses();
         }
       } catch (error) {
         console.error(`Error loading ${activeTab} data:`, error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -106,9 +101,6 @@ const Profile = () => {
         [name]: "",
       }));
     }
-
-    // Clear success message
-    if (profileSuccess) setProfileSuccess("");
   };
 
   /**
@@ -171,7 +163,7 @@ const Profile = () => {
 
     setSaving(true);
     setProfileErrors({});
-    setProfileSuccess("");
+    // Don't clear success message here - let it be cleared only on error
 
     try {
       // Prepare update data
@@ -189,25 +181,17 @@ const Profile = () => {
 
       // Update profile
       const response = await updateUserProfile(updateData);
-      console.log(response);
-
-      // Update auth context
-      updateUser(response.user);
-
-      console.log("Aaayaaa");
 
       // Show success message
       setProfileSuccess("Profile updated successfully!");
 
-      // Clear password fields
-      setProfileForm((prev) => ({
-        ...prev,
-        // currentPassword: "",
-        // newPassword: "",
-        // confirmPassword: "",
-      }));
+      setTimeout(() => setProfileSuccess(""), 5000);
+      console.log();
     } catch (error) {
       console.error("Error updating profile:", error);
+
+      // Clear success message on error
+      setProfileSuccess("");
 
       if (error.response?.data?.errors) {
         const serverErrors = {};
@@ -235,14 +219,10 @@ const Profile = () => {
    */
   const handleAddAddress = async (addressData) => {
     setAddressFormLoading(true);
-    setAddressErrors({});
     setAddressSuccess("");
 
     try {
-      const response = await createAddress(addressData);
-
-      // Add new address to the list
-      setAddresses((prev) => [response.address, ...prev]);
+      await createAddress(addressData);
 
       // Show success message and hide form
       setAddressSuccess("Address added successfully!");
@@ -252,18 +232,6 @@ const Profile = () => {
       setTimeout(() => setAddressSuccess(""), 3000);
     } catch (error) {
       console.error("Error adding address:", error);
-
-      if (error.response?.data?.errors) {
-        const serverErrors = {};
-        error.response.data.errors.forEach((err) => {
-          serverErrors[err.path] = err.msg;
-        });
-        setAddressErrors(serverErrors);
-      } else {
-        setAddressErrors({
-          general: error.response?.data?.message || "Failed to add address",
-        });
-      }
     } finally {
       setAddressFormLoading(false);
     }
@@ -277,18 +245,10 @@ const Profile = () => {
     if (!editingAddress) return;
 
     setAddressFormLoading(true);
-    setAddressErrors({});
     setAddressSuccess("");
 
     try {
-      const response = await updateAddress(editingAddress._id, addressData);
-
-      // Update address in the list
-      setAddresses((prev) =>
-        prev.map((addr) =>
-          addr._id === editingAddress._id ? response.address : addr
-        )
-      );
+      await updateAddress(editingAddress._id, addressData);
 
       // Show success message and hide form
       setAddressSuccess("Address updated successfully!");
@@ -299,18 +259,6 @@ const Profile = () => {
       setTimeout(() => setAddressSuccess(""), 3000);
     } catch (error) {
       console.error("Error updating address:", error);
-
-      if (error.response?.data?.errors) {
-        const serverErrors = {};
-        error.response.data.errors.forEach((err) => {
-          serverErrors[err.path] = err.msg;
-        });
-        setAddressErrors(serverErrors);
-      } else {
-        setAddressErrors({
-          general: error.response?.data?.message || "Failed to update address",
-        });
-      }
     } finally {
       setAddressFormLoading(false);
     }
@@ -324,9 +272,6 @@ const Profile = () => {
     try {
       await deleteAddress(addressId);
 
-      // Remove address from the list
-      setAddresses((prev) => prev.filter((addr) => addr._id !== addressId));
-
       // Show success message
       setAddressSuccess("Address deleted successfully!");
       setDeleteConfirm(null);
@@ -335,9 +280,6 @@ const Profile = () => {
       setTimeout(() => setAddressSuccess(""), 3000);
     } catch (error) {
       console.error("Error deleting address:", error);
-      setAddressErrors({
-        general: error.response?.data?.message || "Failed to delete address",
-      });
     }
   };
 
@@ -348,7 +290,6 @@ const Profile = () => {
   const handleEditAddress = (address) => {
     setEditingAddress(address);
     setShowAddressForm(true);
-    setAddressErrors({});
     setAddressSuccess("");
   };
 
@@ -358,7 +299,6 @@ const Profile = () => {
   const handleCancelAddressForm = () => {
     setShowAddressForm(false);
     setEditingAddress(null);
-    setAddressErrors({});
     setAddressSuccess("");
   };
 
@@ -368,7 +308,6 @@ const Profile = () => {
   const handleNewAddress = () => {
     setEditingAddress(null);
     setShowAddressForm(true);
-    setAddressErrors({});
     setAddressSuccess("");
   };
 
@@ -511,7 +450,7 @@ const Profile = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-9 mt-8 lg:mt-0">
+          <div className=" h-screen lg:col-span-9 mt-8 lg:mt-0">
             <div className="bg-white shadow rounded-lg">
               {/* Profile Information Tab */}
               {activeTab === "profile" && (
@@ -675,7 +614,7 @@ const Profile = () => {
                     Order History
                   </h2>
 
-                  {loading ? (
+                  {ordersLoading ? (
                     <div className="flex justify-center py-12">
                       <LoadingSpinner size="lg" />
                     </div>
@@ -833,7 +772,7 @@ const Profile = () => {
                   )}
 
                   {/* Error Message */}
-                  {addressErrors.general && (
+                  {addressError && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
                       <div className="flex">
                         <div className="flex-shrink-0">
@@ -851,7 +790,7 @@ const Profile = () => {
                         </div>
                         <div className="ml-3">
                           <p className="text-sm font-medium text-red-800">
-                            {addressErrors.general}
+                            {addressError}
                           </p>
                         </div>
                       </div>
@@ -870,12 +809,12 @@ const Profile = () => {
                         }
                         onCancel={handleCancelAddressForm}
                         loading={addressFormLoading}
-                        errors={addressErrors}
+                        errors={{}}
                       />
                     </div>
                   )}
 
-                  {loading ? (
+                  {addressesLoading ? (
                     <div className="flex justify-center py-12">
                       <LoadingSpinner size="lg" />
                     </div>

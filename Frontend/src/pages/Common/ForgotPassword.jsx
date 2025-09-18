@@ -3,9 +3,9 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { forgotPassword } from "../shared/api/apiService.js";
-import Button from "../shared/components/Button.jsx";
-import Input from "../shared/components/Input.jsx";
+import Button from "../../Components/Common/Button.jsx";
+import Input from "../../Components/Common/Input.jsx";
+import { forgotPassword } from "../../shared/api/Common/auth.apiServices.js";
 
 /**
  * ForgotPassword page component
