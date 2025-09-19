@@ -1,12 +1,12 @@
 // AdminPanel.jsx - Admin dashboard page
 // This page provides administrative functionality for managing the e-commerce platform
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar.jsx";
 import CouponsTab from "../../components/admin/CouponsTab.jsx";
 import OrdersTab from "../../components/admin/OrdersTab.jsx";
 import OverviewTab from "../../components/admin/overviewTab.jsx";
-import ProductsTab from "../../components/admin/ProductsTab.jsx";
+import ProductsTab from "../../Components/Admin/Product/ProductsTab.jsx";
 import UsersTab from "../../components/admin/UsersTab.jsx";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js"; //New
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
@@ -20,9 +20,12 @@ const AdminPanel = () => {
   const { initializeAdminDashboard } = useAdmin();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Initialize admin dashboard data on mount
+  // Initialize admin dashboard data on mount (guard against double-invoke in StrictMode)
+  const initializedRef = useRef(false);
   useEffect(() => {
+    if (initializedRef.current) return;
     if (user && user.role === "admin") {
+      initializedRef.current = true;
       initializeAdminDashboard();
     }
   }, [user, initializeAdminDashboard]);

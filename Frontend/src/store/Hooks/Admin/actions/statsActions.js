@@ -40,7 +40,7 @@ throw error;
 initializeAdminDashboard: useCallback(async () => {
 dispatch(setStatsLoading(true));
 try {
- dispatch(setStatsLoading(true));
+//  dispatch(setStatsLoading(true));
 
         console.log("Fetching admin stats...");
         const statsPromise = apiGetAdminStats()

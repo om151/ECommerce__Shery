@@ -193,28 +193,34 @@ const OverviewTab = () => {
             </div>
           ) : products.lowStockProducts?.length > 0 ? (
             <div className="space-y-3">
-              {products.lowStockProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-md"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {product.title || "Unknown Product"}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {product.categories?.[0] || "Uncategorized"}
-                    </p>
+              {products.lowStockProducts.map((product) => {
+                // Find the lowest quantity among all variants
+                const lowestQuantity = product.variants?.reduce((min, variant) => {
+                  const qty = variant.inventoryId?.quantityAvailable ?? 0;
+                  return min === null ? qty : Math.min(min, qty);
+                }, null);
+
+                return (
+                  <div
+                    key={product._id}
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-md"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {product.title || "Unknown Product"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {product.categories?.[0] || "Uncategorized"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                        {lowestQuantity ?? 0} left
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
-                      {product.variants?.[0]?.inventoryId?.quantityAvailable ||
-                        0}{" "}
-                      left
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8">

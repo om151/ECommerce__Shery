@@ -1,5 +1,5 @@
 import React from "react";
-import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
+import { useAdmin } from "../../../store/Hooks/Admin/useAdmin.js";
 import ProductEditModal from "./productEditModel.jsx";
 
 const ProductsTab = () => {

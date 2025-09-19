@@ -179,14 +179,14 @@ import httpClient from "./http.js";
 //     throw error;
 //   }
 // };
-// export const loginUser = async (credentials) => {
-//   try {
-//     const response = await httpClient.post("/user/login", credentials);
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+export const loginUser = async (credentials) => {
+  try {
+    const response = await httpClient.post("/user/login", credentials);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 /**
  * Register new user account
