@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
-import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
+import { useAdmin } from "../../../store/Hooks/Admin/useAdmin.js";
+import CouponFormModal from "./CouponFormModal.jsx";
 
 const CouponsTab = () => {
-  const { coupons, ui, fetchCoupons, clearCouponsError } = useAdmin();
+  const {
+    coupons,
+    ui,
+    fetchCoupons,
+    clearCouponsError,
+    createCoupon,
+    editCoupon,
+    deleteCoupon,
+  } = useAdmin();
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     fetchCoupons(currentPage, 10);
@@ -16,14 +27,32 @@ const CouponsTab = () => {
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
-  const handleCreateCoupon = () => setIsCreating(true);
+  const handleCreateCoupon = () => {
+    console.log("Creating coupon");
+    setIsCreating(true);
+  };
+  const handleEditCoupon = (c) => setEditing(c);
+  const handleDeleteCoupon = async (c) => {
+    if (!window.confirm(`Delete coupon ${c.code}? This is a soft delete.`))
+      return;
+    setDeletingId(c._id);
+    try {
+      await deleteCoupon(c._id);
+      await fetchCoupons(currentPage, 10);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Failed to delete coupon");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const formatDate = (d) => new Date(d).toLocaleDateString();
   const getDiscountDisplay = (c) =>
     c.discountType === "percentage"
       ? `${c.maxDiscount}%`
       : c.discountType === "fixed"
-      ? `$${c.maxDiscount}`
+      ? `₹${c.maxDiscount}`
       : c.discountType === "free_shipping"
       ? "Free Shipping"
       : "N/A";
@@ -168,7 +197,7 @@ const CouponsTab = () => {
                           {getDiscountDisplay(coupon)}
                         </div>
                         <div className="text-sm text-gray-500">
-                          Min: ${coupon.minOrderValue || 0}
+                          Min: ₹{coupon.minOrderValue || 0}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -187,11 +216,25 @@ const CouponsTab = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
+                          <button
+                            className="text-blue-600 hover:text-blue-900"
+                            onClick={() => handleEditCoupon(coupon)}
+                          >
                             Edit
                           </button>
-                          <button className="text-red-600 hover:text-red-900">
-                            Delete
+                          <button
+                            className={`text-red-600 hover:text-red-900 ${
+                              coupon.isActive === false
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                            disabled={
+                              deletingId === coupon._id ||
+                              coupon.isActive === false
+                            }
+                            onClick={() => handleDeleteCoupon(coupon)}
+                          >
+                            {deletingId === coupon._id ? "Deleting…" : "Delete"}
                           </button>
                         </div>
                       </td>
@@ -236,6 +279,29 @@ const CouponsTab = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       )}
+
+      {/* Create Modal - render outside pagination condition so it always mounts */}
+      {isCreating && (<CouponFormModal
+        open={isCreating}
+        onClose={() => setIsCreating(false)}
+        onSubmit={async (payload) => {
+          await createCoupon(payload);
+          await fetchCoupons(1, 10);
+          setCurrentPage(1);
+        }}
+      />)}
+
+      {/* Edit Modal - always mounted at root level */}
+      {!!editing && (<CouponFormModal
+        open={!!editing}
+        initial={editing || {}}
+        onClose={() => setEditing(null)}
+        onSubmit={async (payload) => {
+          const { _id, code, ...rest } = { ...editing, ...payload };
+          await editCoupon(_id, rest);
+          await fetchCoupons(currentPage, 10);
+        }}
+      />)}
     </div>
   );
 };

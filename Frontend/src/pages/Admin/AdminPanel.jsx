@@ -3,16 +3,16 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar.jsx";
-import CouponsTab from "../../components/admin/CouponsTab.jsx";
+import AnalyticsTab from "../../components/admin/AnalyticsTab.jsx";
+import CouponsTab from "../../Components/Admin/Coupon/CouponsTab.jsx";
 import OrdersTab from "../../components/admin/OrdersTab.jsx";
 import OverviewTab from "../../components/admin/overviewTab.jsx";
 import ProductsTab from "../../Components/Admin/Product/ProductsTab.jsx";
+import ReviewTab from "../../components/admin/ReviewTab.jsx";
+import SettingTab from "../../components/admin/SettingTab.jsx";
 import UsersTab from "../../components/admin/UsersTab.jsx";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js"; //New
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
-import ReviewTab from "../../components/admin/ReviewTab.jsx";
-import AnalyticsTab from "../../components/admin/AnalyticsTab.jsx";
-import SettingTab from "../../components/admin/SettingTab.jsx";
 
 /**
  * AdminPanel component - Main admin dashboard
@@ -67,17 +67,11 @@ const AdminPanel = () => {
       case "coupons":
         return <CouponsTab />;
       case "reviews":
-        return (
-          <ReviewTab/>
-        );
+        return <ReviewTab />;
       case "analytics":
-        return (
-         <AnalyticsTab />
-        );
+        return <AnalyticsTab />;
       case "settings":
-        return (
-          <SettingTab />
-        );
+        return <SettingTab />;
       default:
         return <OverviewTab />;
     }
