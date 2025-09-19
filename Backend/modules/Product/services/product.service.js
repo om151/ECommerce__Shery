@@ -24,13 +24,11 @@ async function editProductService(productId, updateData, files) {
 }
 
 // --- List All Products (non-deleted) with non-deleted variants and pagination ---
-async function listAllProductsService(page = 1, limit = 10, isAdmin = false) {
+async function listAllProductsService(page = 1, limit = 10, options = {}) {
   const skip = (page - 1) * limit;
-
-  // Base query - exclude deleted products
   const baseQuery = { isDeleted: { $ne: true } };
 
-  const products = await Product.find(baseQuery)
+  let products = await Product.find(baseQuery)
     .populate({
       path: "variants",
       match: { isDeleted: { $ne: true } },
@@ -44,8 +42,23 @@ async function listAllProductsService(page = 1, limit = 10, isAdmin = false) {
     .limit(parseInt(limit))
     .lean();
 
-  // Get total count for pagination
-  const total = await Product.countDocuments(baseQuery);
+  // Filter by low stock if requested
+  if (options.lowStock !== undefined) {
+    const threshold = options.lowStock;
+    products = products.filter(product =>
+      product.variants.some(
+        v => v.inventoryId && v.inventoryId.quantityAvailable <= threshold
+      )
+    );
+  }
+
+  // Get total count for pagination (after filtering if lowStock is used)
+  let total;
+  if (options.lowStock !== undefined) {
+    total = products.length;
+  } else {
+    total = await Product.countDocuments(baseQuery);
+  }
   const totalPages = Math.ceil(total / limit);
 
   return {
@@ -77,6 +90,14 @@ async function editVariantService(variantId, updateData, files) {
   // Handle images
   if (files && files.length > 0) {
     variant.images = files.map((f) => f.path);
+  }
+
+  if(updateData.quantityAvailable !== undefined){
+    const inventory = await Inventory.findById(variant.inventoryId);
+    if (inventory) {
+      inventory.quantityAvailable = updateData.quantityAvailable;
+      await inventory.save();
+    }
   }
 
   await variant.save();

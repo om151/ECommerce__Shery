@@ -127,8 +127,17 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
 
 // Get All Products (public) with pagination
 exports.listAllProducts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-  const result = await listAllProductsService(page, limit);
+  const { page = 1, limit = 10, lowStock } = req.query;
+  let result;
+
+  if (lowStock) {
+    // If lowStock is provided, filter products with inventory below threshold
+    const threshold = Number(lowStock);
+    result = await listAllProductsService(page, limit, { lowStock: threshold });
+  } else {
+    result = await listAllProductsService(page, limit);
+  }
+
   res.status(200).json({
     success: true,
     ...result,
