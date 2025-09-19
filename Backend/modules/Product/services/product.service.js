@@ -1,6 +1,7 @@
 const { Product, ProductVariant } = require("../models/product.model");
 const Inventory = require("../models/inventory.model");
 const Review = require("../../Review/review.model"); // Adjust path if needed
+const mongoose = require("mongoose");
 
 // --- Edit Product ---
 async function editProductService(productId, updateData, files) {
@@ -168,10 +169,15 @@ async function addProductWithVariantsService({
   });
 
   const productVariants = [];
+  const createdInventoryIds = [];
+  const createdVariantIds = [];
   for (const variant of variants) {
+    // Use a unique placeholder for variantId to satisfy the unique index (productId, variantId)
+    const placeholderVariantId = new mongoose.Types.ObjectId();
+
     const inventory = await Inventory.create({
       productId: null,
-      variantId: null,
+      variantId: placeholderVariantId,
       reservedQuantity: 0,
       quantityAvailable: variant.quantityAvailable,
     });
@@ -186,10 +192,13 @@ async function addProductWithVariantsService({
       productId: null, // Will set after product creation
     });
 
-    inventory.variantId = createdVariant._id;
-    await inventory.save();
+    await Inventory.findByIdAndUpdate(inventory._id, {
+      $set: { variantId: createdVariant._id },
+    });
 
     productVariants.push(createdVariant._id);
+    createdVariantIds.push(createdVariant._id);
+    createdInventoryIds.push(inventory._id);
   }
 
   const product = await Product.create({
@@ -201,15 +210,19 @@ async function addProductWithVariantsService({
     searchKeywords,
   });
 
-  await Inventory.updateMany(
-    { productId: null },
-    { $set: { productId: product._id } }
-  );
+  if (createdInventoryIds.length > 0) {
+    await Inventory.updateMany(
+      { _id: { $in: createdInventoryIds } },
+      { $set: { productId: product._id } }
+    );
+  }
 
-  await ProductVariant.updateMany(
-    { productId: null },
-    { $set: { productId: product._id } }
-  );
+  if (createdVariantIds.length > 0) {
+    await ProductVariant.updateMany(
+      { _id: { $in: createdVariantIds } },
+      { $set: { productId: product._id } }
+    );
+  }
 
   return product;
 }
