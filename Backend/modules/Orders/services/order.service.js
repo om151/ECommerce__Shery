@@ -8,6 +8,7 @@ const Coupon = require("../../Coupon/models/coupon.model");
 const { validateCoupon } = require("../../Coupon/services/coupon.service");
 const Inventory = require("../../Product/models/inventory.model");
 const { ProductVariant } = require("../../Product/models/product.model");
+const CouponUsage = require("../../Coupon/models/couponUsages.model");
 
 function generateOrderNumber() {
   const now = new Date();
@@ -258,6 +259,31 @@ async function createOrderForUser(userId, payload) {
       ]
       // { session }
     );
+
+   
+
+    if (appliedCouponId) {
+
+       Coupon.findByIdAndUpdate(
+      appliedCouponId,
+      { $inc: { usageCount: 1 } }
+      // { session }
+    ).exec();
+
+    
+      CouponUsage.create(
+        [
+          {
+            couponId: appliedCouponId,
+            userId,
+            orderId: order[0]._id,
+            discountAmount: orderDiscount,
+            usedAt: new Date(),
+          },
+        ]
+        // { session }
+      );
+    }
 
     // Deduct inventory atomically with conditional guard to avoid race conditions
     for (const dec of inventoryDecrements) {
