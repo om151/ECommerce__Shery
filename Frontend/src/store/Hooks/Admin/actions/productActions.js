@@ -30,6 +30,7 @@ export const createProductActions = (dispatch) => ({
       dispatch(clearAdminProductsError());
       try {
         const response = await apiGetAllProducts(page, limit);
+        // console.log("Fetched products:", response);
         dispatch(setAdminProducts(response));
         dispatch(setAdminProductsLoading(false));
         return { type: "admin/fetchProducts/fulfilled", payload: response };

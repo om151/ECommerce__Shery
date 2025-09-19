@@ -12,6 +12,8 @@ const ProductEditModal = ({ product, onClose, onSave }) => {
     title: product.title || "",
     description: product.description || "",
     categories: product.categories || [],
+    brand: product.attributes.brand || "",
+    searchKeywords: product.searchKeywords || "",
   });
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState(null);
@@ -151,6 +153,10 @@ const ProductEditModal = ({ product, onClose, onSave }) => {
         title: editedProduct.title,
         description: editedProduct.description,
         categories: editedProduct.categories,
+       attributes:{
+         brand: editedProduct.brand,
+       },
+        searchKeywords: editedProduct.searchKeywords,
       };
       console.log("Saving product with data:", payload);
       await updateProduct(product._id, payload);

@@ -76,6 +76,10 @@ router.put(
   authMiddleware,
   adminAuthMiddleware,
   upload.array("images", 20),
+  async (req, res, next) => {
+    console.log("Files received:", req.body);
+    next();
+  },
   parseProductFormData,
   validateProductEdit,
   productController.editProduct
