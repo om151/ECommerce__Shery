@@ -63,16 +63,13 @@ export const addVariantToProduct = async (productId, variantData) => {
       form.append("compareAtPrice", variantData.compareAtPrice);
     if (typeof variantData.quantityAvailable !== "undefined")
       form.append("quantityAvailable", variantData.quantityAvailable);
-    
 
     // Images: expect File[] or undefined
     if (Array.isArray(variantData.images)) {
-      
-      for (const file of variantData.images ) {
+      for (const file of variantData.images) {
         if (file) form.append("images", file);
       }
     }
-
 
     const response = await httpClient.post(
       `/product/variant/add/${productId}`,
@@ -125,6 +122,70 @@ export const editVariant = async (variantId, updateData) => {
 export const deleteVariant = async (variantId) => {
   try {
     const response = await httpClient.delete(`/product/variant/${variantId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// --- Product APIs ---
+
+// Create product with variants and images
+export const createProductWithVariants = async (product) => {
+  try {
+    const form = new FormData();
+    if (product.title) form.append("title", product.title);
+    if (product.description) form.append("description", product.description);
+    if (Array.isArray(product.categories)) {
+      form.append("categories", JSON.stringify(product.categories));
+    }
+    // attributes.brand is required by validation
+    if (product.brand) {
+      form.append("attributes", JSON.stringify({ brand: product.brand }));
+    }
+    if (Array.isArray(product.searchKeywords)) {
+      form.append("searchKeywords", JSON.stringify(product.searchKeywords));
+    }
+
+    // Variants: send minimal info expected by backend + tempId to map images
+    const now = Date.now();
+    const preparedVariants = (product.variants || []).map((v, idx) => ({
+      tempId: v.tempId ?? `tmp_${idx}_${now}`,
+      name: v.name,
+      attributes: { color: v.color || "", size: v.size || "" },
+      price: v.price,
+      compareAtPrice: v.compareAtPrice,
+      quantityAvailable: v.quantityAvailable,
+    }));
+    form.append("variants", JSON.stringify(preparedVariants));
+
+    // Images: append under field names images_<tempId> so backend can map reliably
+    (product.variants || []).forEach((v, idx) => {
+      const tmpId = preparedVariants[idx]?.tempId;
+      if (!tmpId) return;
+      const filesLike = v.imagesFiles;
+      if (!filesLike) return;
+      const files = Array.isArray(filesLike)
+        ? filesLike
+        : typeof filesLike.length === "number"
+        ? Array.from(filesLike)
+        : [];
+      for (const file of files) {
+        if (file) form.append(`images_${tmpId}`, file);
+      }
+    });
+
+    const response = await httpClient.post(`/product/add`, form);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Delete product by id
+export const deleteProduct = async (productId) => {
+  try {
+    const response = await httpClient.delete(`/product/${productId}`);
     return response.data;
   } catch (error) {
     throw error;

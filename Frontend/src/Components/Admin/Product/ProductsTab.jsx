@@ -1,12 +1,15 @@
 import React from "react";
 import { useAdmin } from "../../../store/Hooks/Admin/useAdmin.js";
+import CreateProductModal from "./CreateProductModal.jsx";
 import ProductEditModal from "./productEditModel.jsx";
 
 const ProductsTab = () => {
-  const { products, fetchProducts, ui } = useAdmin();
+  const { products, fetchProducts, ui, deleteProduct } = useAdmin();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [showProductModal, setShowProductModal] = React.useState(false);
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(null);
 
   React.useEffect(() => {
     fetchProducts(currentPage, 10);
@@ -40,12 +43,20 @@ const ProductsTab = () => {
             Add, edit, and manage your product catalog.
           </p>
         </div>
-        <button
-          onClick={() => fetchProducts(currentPage, 10)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fetchProducts(currentPage, 10)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Refresh
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            onClick={() => setShowCreateModal(true)}
+          >
+            Create Product
+          </button>
+        </div>
       </div>
 
       {ui.errors.products && (
@@ -92,8 +103,7 @@ const ProductsTab = () => {
               {products.list.map((product) => (
                 <div
                   key={product._id}
-                  className="p-6 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleProductClick(product)}
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden flex-shrink-0">
@@ -109,7 +119,10 @@ const ProductsTab = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => handleProductClick(product)}
+                    >
                       <h3 className="text-sm font-medium text-gray-900">
                         {product.title || "Untitled Product"}
                       </h3>
@@ -149,6 +162,40 @@ const ProductsTab = () => {
                           ? "Active"
                           : "No Variants"}
                       </span>
+                      <div className="mt-2 flex items-center justify-end gap-2">
+                        <button
+                          className="px-3 py-1 text-sm border rounded hover:bg-gray-50"
+                          onClick={() => handleProductClick(product)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          disabled={isDeleting === product._id}
+                          className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50"
+                          onClick={async () => {
+                            if (
+                              !window.confirm(
+                                "Delete this product? This will soft-delete it and its variants."
+                              )
+                            )
+                              return;
+                            setIsDeleting(product._id);
+                            try {
+                              await deleteProduct(product._id);
+                              await fetchProducts(currentPage, 10);
+                            } catch (e) {
+                              console.error("Delete product failed", e);
+                              alert(e.message || "Failed to delete product");
+                            } finally {
+                              setIsDeleting(null);
+                            }
+                          }}
+                        >
+                          {isDeleting === product._id
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -198,6 +245,16 @@ const ProductsTab = () => {
             // Refresh products after save
             fetchProducts(currentPage, 10);
             closeProductModal();
+          }}
+        />
+      )}
+
+      {showCreateModal && (
+        <CreateProductModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={async () => {
+            await fetchProducts(1, 10);
+            setCurrentPage(1);
           }}
         />
       )}

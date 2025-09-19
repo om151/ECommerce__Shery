@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import {
   addVariantToProduct as apiAddVariantToProduct,
+  createProductWithVariants as apiCreateProductWithVariants,
+  deleteProduct as apiDeleteProduct,
   deleteVariant as apiDeleteVariant,
   editVariant as apiEditVariant,
   getAllProducts as apiGetAllProducts,
@@ -119,6 +121,40 @@ export const createProductActions = (dispatch) => ({
           error.response?.data?.message ||
           error.message ||
           "Failed to delete variant";
+        throw new Error(message);
+      }
+    },
+    [dispatch]
+  ),
+
+  // Product create & delete
+  createProduct: useCallback(
+    async (productData) => {
+      try {
+        console.log("Creating product with data:", productData);
+        const response = await apiCreateProductWithVariants(productData);
+        return { type: "admin/createProduct/fulfilled", payload: response };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to create product";
+        throw new Error(message);
+      }
+    },
+    [dispatch]
+  ),
+
+  deleteProduct: useCallback(
+    async (productId) => {
+      try {
+        const response = await apiDeleteProduct(productId);
+        return { type: "admin/deleteProduct/fulfilled", payload: response };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to delete product";
         throw new Error(message);
       }
     },
