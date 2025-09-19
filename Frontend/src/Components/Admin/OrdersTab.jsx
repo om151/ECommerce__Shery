@@ -1,13 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
 
 const OrdersTab = () => {
-  const { orders, fetchOrders, ui } = useAdmin();
+  // Note: allOrders lives under orders slice (orders.allOrders), not top-level
+  const { orders, fetchOrders, ui, fetchAllOrders } = useAdmin();
   const [currentPage, setCurrentPage] = React.useState(1);
 
+  const [showOrders, setShowOrders] = useState([]);
+
+  const [searchOrder, setSearchOrder] = useState("");
+  const [searchType, setSearchType] = useState("orderNumber");
+  
+  const allOrders = orders?.allOrders || [];
+
+  const totalPage = Math.ceil(allOrders.length/10) || 1;
+
+  // useEffect(() => {
+  //   if (orders.list) {
+  //     setShowOrders(orders.allOrders);
+  //   }
+  // }, [orders]);
+  // const allOrders = fetchOrders();
+  // console.log("All Orders:", allOrders);
+
   React.useEffect(() => {
-    fetchOrders(currentPage, 10);
-  }, [currentPage, fetchOrders]);
+    setShowOrders(allOrders.slice((currentPage-1)*10, currentPage*10));
+  }, [currentPage,orders]);
+
+  useEffect(() => {
+    fetchAllOrders();
+  }, []);
+
+  // Access the full orders list from nested state
+  
+
+  const handleOrderSearch = (value) => {
+
+    if(searchType==="orderNumber"){
+      setSearchOrder(value);
+            const filteredOrders = allOrders.filter((order) =>
+              order.orderNumber
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase())
+            );
+             setShowOrders(filteredOrders);
+    }else if(searchType==="customerEmail"){
+      setSearchOrder(value);
+      const filteredOrders = allOrders.filter((order) =>
+        order.userId?.email.toLowerCase().includes(value.toLowerCase())
+      );
+      setShowOrders(filteredOrders);
+    }
+
+  }
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("en-IN", {
@@ -43,6 +89,26 @@ const OrdersTab = () => {
         </button>
       </div>
 
+      <div>
+        <input
+          type="text"
+          value={searchOrder}
+          onChange={(e) => {
+            handleOrderSearch(e.target.value);
+          }}
+          placeholder={searchType === "orderNumber" ? "Search by order number" : "Search by customer email"}
+          className="px-4 py-2 border border-gray-300 rounded-md mr-2 mb-4 w-full md:w-1/3"
+        />
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-md mb-4 w-full md:w-1/3"
+        >
+          <option value="orderNumber">Order Number</option>
+          <option value="customerEmail" disabled >Customer Email</option>  
+        </select>
+      </div>
+
       {ui.errors.orders && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-700 text-sm">
@@ -72,18 +138,18 @@ const OrdersTab = () => {
             </div>
           ))}
         </div>
-      ) : orders.list?.length > 0 ? (
+      ) : showOrders?.length > 0 ? (
         <>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Orders ({orders.total})
+                  Orders ({searchOrder ? showOrders.length : allOrders.length})
                 </h3>
               </div>
             </div>
             <div className="divide-y divide-gray-200">
-              {orders.list.map((order) => (
+              {showOrders.map((order) => (
                 <div key={order._id} className="p-6 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -137,7 +203,7 @@ const OrdersTab = () => {
             </div>
           </div>
 
-          {orders.totalPages > 1 && (
+          {totalPage > 1 && !searchOrder && (
             <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -147,13 +213,13 @@ const OrdersTab = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {orders.totalPages}
+                Page {currentPage} of {totalPage}
               </span>
               <button
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, orders.totalPages))
+                  setCurrentPage((p) => Math.min(p + 1, totalPage))
                 }
-                disabled={currentPage === orders.totalPages}
+                disabled={currentPage === totalPage}
                 className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next

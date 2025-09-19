@@ -413,7 +413,24 @@ async function listAllOrders({ page = 1, limit = 10 } = {}) {
   return { orders, page, limit, total, pages: Math.ceil(total / limit) };
 }
 
+
+async function listAllOrdersTotalOrders() {
+
+
+  const [orders, total] = await Promise.all([
+    Order.find({})
+      .sort({ createdAt: -1 })
+      .populate("items")
+      .populate("userId", "name email")
+      .lean(),
+    Order.countDocuments({}),
+  ]);
+
+  return { orders, total };
+}
+
 module.exports = {
+  listAllOrdersTotalOrders,
   createOrderForUser,
   updateOrderShippingAddress,
   cancelOrder,

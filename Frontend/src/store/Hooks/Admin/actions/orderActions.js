@@ -1,5 +1,6 @@
 import {
 setOrders as setAdminOrders,
+setAllOrders as setAdminAllOrders,
 setRecentOrders,
 } from "../../../slices/Admin/orderSlice.js";
 import {
@@ -9,6 +10,7 @@ clearOrdersError as clearAdminOrdersError,
 } from "../../../slices/Admin/UiSlice.js";
 import {
 getAllOrders as apiGetAllOrders,
+getAllOrdersTotalOrders as apiGetAllOrdersTotalOrders,
 getRecentOrders as apiGetRecentOrders,
 } from "../../../../shared/api/Admin/allOrders.apiService.js";
 import { useCallback } from "react";
@@ -39,7 +41,22 @@ throw error;
  [dispatch]
     ),
 
-
+    fetchAllOrders: useCallback(async () => {
+      dispatch(setAdminOrdersLoading(true));
+      dispatch(clearAdminOrdersError());
+      try {
+        const response = await apiGetAllOrdersTotalOrders();
+        dispatch(setAdminAllOrders(response));
+        dispatch(setAdminOrdersLoading(false));
+        return { type: "admin/fetchAllOrders/fulfilled", payload: response };
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message || error.message || "Failed to fetch orders";
+        dispatch(setAdminOrdersError(errorMessage));
+        dispatch(setAdminOrdersLoading(false));
+        throw error;
+      }
+    }, [dispatch]),
 
 fetchRecentOrders: useCallback( async (limit = 10) => {
 try {

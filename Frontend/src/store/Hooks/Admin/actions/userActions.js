@@ -16,11 +16,11 @@ setUsersError: (err) => dispatch(setUsersError(err)),
 clearUsersError: () => dispatch(clearUsersError()),
 
 
-fetchUsers: useCallback(async (page = 1, limit = 10) => {
+fetchUsers: useCallback(async () => {
 dispatch(setUsersLoading(true));
 dispatch(clearUsersError());
 try {
-const response = await apiGetAllUsers(page, limit);
+const response = await apiGetAllUsers();
 dispatch(setUsers(response));
 dispatch(setUsersLoading(false));
 return { type: "admin/fetchUsers/fulfilled", payload: response };

@@ -12,9 +12,9 @@ import { store } from "./store/store.js";
 // This is the React 18 way of rendering the app
 ReactDOM.createRoot(document.getElementById("root")).render(
   // StrictMode helps identify potential problems in development
-  <React.StrictMode>
+  // <React.StrictMode>
     <Provider store={store}>
       <App />
     </Provider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

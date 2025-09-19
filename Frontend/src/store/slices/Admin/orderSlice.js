@@ -12,6 +12,9 @@ state.total = action.payload.totalCount || action.payload.total || 0;
 state.currentPage = action.payload.currentPage || action.payload.page || 1;
 state.totalPages = action.payload.totalPages || Math.ceil(state.total / 10);
 },
+setAllOrders: (state, action) => {
+state.allOrders = action.payload.totalOrders.orders || action.payload.data || [];
+},
 setRecentOrders: (state, action) => {
 state.recentOrders = action.payload.orders || action.payload.data || [];
 },
@@ -21,5 +24,5 @@ state.recentOrders = action.payload.orders || action.payload.data || [];
 });
 
 
-export const { setOrders, setRecentOrders } = ordersSlice.actions;
+export const { setOrders, setRecentOrders,setAllOrders } = ordersSlice.actions;
 export default ordersSlice.reducer;

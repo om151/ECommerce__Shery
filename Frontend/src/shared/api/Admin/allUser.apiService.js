@@ -1,10 +1,8 @@
 import httpClient from "../http.js";
 
-export const getAllUsers = async (page = 1, limit = 10) => {
+export const getAllUsers = async () => {
   try {
-    const response = await httpClient.get("/user/admin/all", {
-      params: { page, limit },
-    });
+    const response = await httpClient.get("/user/admin/all");
     return response.data;
   } catch (error) {
     throw error;

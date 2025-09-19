@@ -12,6 +12,16 @@ export const getAllOrders = async (page = 1, limit = 10) => {
   }
 };
 
+export const getAllOrdersTotalOrders = async () => {
+  try {
+    const response = await httpClient.get("/order/admin/all");
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export const getRecentOrders = async (limit = 10) => {
   try {
     const response = await httpClient.get("/order/admin/all", {

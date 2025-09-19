@@ -1,13 +1,40 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
+import { use } from "react";
 
 const UsersTab = () => {
   const { users, fetchUsers, ui } = useAdmin();
   const [currentPage, setCurrentPage] = React.useState(1);
 
+  const [showUser, setShowUser] = React.useState([]);
+
+  const [searchUser, setSearchUser] = React.useState("");
+
+  const allUsers = users.list || [];
+
+  const totalPage = Math.ceil(allUsers.length/10) || 1;
+
+  const handleSearch = async (value) => {
+    setSearchUser(value);
+    const filteredUsers = allUsers.filter((user) =>
+      user.email.toLowerCase().includes(value.toLowerCase())
+    );
+    setShowUser(filteredUsers);
+  };
+
+  // React.useEffect(() => {
+  //   if (users.list) {
+  //     setAllUsers(users.list);
+  //   }
+  // }, [users]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   React.useEffect(() => {
-    fetchUsers(currentPage, 10);
-  }, [currentPage, fetchUsers]);
+    setShowUser(allUsers.slice((currentPage - 1) * 10, currentPage * 10));
+  }, [currentPage, users]);
 
   return (
     <div className="p-6">
@@ -26,6 +53,16 @@ const UsersTab = () => {
         >
           Refresh
         </button>
+      </div>
+
+      <div className="mb-2">
+        <input
+          type="text"
+          value={searchUser}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Search by email"
+          className="px-4 py-2 border border-gray-300 rounded-md mr-2"
+        />
       </div>
 
       {ui.errors.users && (
@@ -54,18 +91,18 @@ const UsersTab = () => {
             </div>
           ))}
         </div>
-      ) : users.list?.length > 0 ? (
+      ) : showUser.length > 0 ? (
         <>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Users ({users.total})
+                  Users ({ searchUser ? showUser.length : allUsers.length })
                 </h3>
               </div>
             </div>
             <div className="divide-y divide-gray-200">
-              {users.list.map((user) => (
+              {showUser.map((user) => (
                 <div key={user._id} className="p-6 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -115,7 +152,7 @@ const UsersTab = () => {
             </div>
           </div>
 
-          {users.totalPages > 1 && (
+         {totalPage > 1 && !searchUser && (
             <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -125,13 +162,13 @@ const UsersTab = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {users.totalPages}
+                Page {currentPage} of {totalPage}
               </span>
               <button
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, users.totalPages))
+                  setCurrentPage((p) => Math.min(p + 1, totalPage))
                 }
-                disabled={currentPage === users.totalPages}
+                disabled={currentPage === totalPage}
                 className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
