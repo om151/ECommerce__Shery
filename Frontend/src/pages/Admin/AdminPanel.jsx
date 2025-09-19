@@ -10,6 +10,9 @@ import ProductsTab from "../../Components/Admin/Product/ProductsTab.jsx";
 import UsersTab from "../../components/admin/UsersTab.jsx";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js"; //New
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import ReviewTab from "../../components/admin/ReviewTab.jsx";
+import AnalyticsTab from "../../components/admin/AnalyticsTab.jsx";
+import SettingTab from "../../components/admin/SettingTab.jsx";
 
 /**
  * AdminPanel component - Main admin dashboard
@@ -65,45 +68,15 @@ const AdminPanel = () => {
         return <CouponsTab />;
       case "reviews":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Review Management
-            </h2>
-            <p className="text-gray-600">
-              Monitor and moderate product reviews.
-            </p>
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-blue-800">🚧 Feature coming soon...</p>
-            </div>
-          </div>
+          <ReviewTab/>
         );
       case "analytics":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Analytics & Reports
-            </h2>
-            <p className="text-gray-600">
-              View detailed analytics and generate reports.
-            </p>
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-blue-800">🚧 Feature coming soon...</p>
-            </div>
-          </div>
+         <AnalyticsTab />
         );
       case "settings":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              System Settings
-            </h2>
-            <p className="text-gray-600">
-              Configure system settings and preferences.
-            </p>
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-blue-800">🚧 Feature coming soon...</p>
-            </div>
-          </div>
+          <SettingTab />
         );
       default:
         return <OverviewTab />;
