@@ -37,7 +37,14 @@ parseProductFormData = (req, res, next) => {
     try {
       req.body.variants = JSON.parse(req.body.variants);
     } catch {
-      req.body.variants = [req.body.variants];
+      // Handle repeated fields like variants[0][field]
+      try {
+        req.body.variants = Array.isArray(req.body.variants)
+          ? req.body.variants
+          : [req.body.variants];
+      } catch {
+        req.body.variants = [req.body.variants];
+      }
     }
   }
   if (req.body.attributes && typeof req.body.attributes === "string") {
@@ -56,7 +63,8 @@ router.post(
 
   authMiddleware,
   adminAuthMiddleware,
-  upload.array("images", 20),
+  // Accept files provided under any field name (e.g., images_<tempId>)
+  upload.any(),
   parseProductFormData,
   validateProduct,
   productController.addProductWithVariants

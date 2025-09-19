@@ -45,9 +45,9 @@ async function listAllProductsService(page = 1, limit = 10, options = {}) {
   // Filter by low stock if requested
   if (options.lowStock !== undefined) {
     const threshold = options.lowStock;
-    products = products.filter(product =>
+    products = products.filter((product) =>
       product.variants.some(
-        v => v.inventoryId && v.inventoryId.quantityAvailable <= threshold
+        (v) => v.inventoryId && v.inventoryId.quantityAvailable <= threshold
       )
     );
   }
@@ -92,7 +92,7 @@ async function editVariantService(variantId, updateData, files) {
     variant.images = files.map((f) => f.path);
   }
 
-  if(updateData.quantityAvailable !== undefined){
+  if (updateData.quantityAvailable !== undefined) {
     const inventory = await Inventory.findById(variant.inventoryId);
     if (inventory) {
       inventory.quantityAvailable = updateData.quantityAvailable;
@@ -151,10 +151,20 @@ async function addProductWithVariantsService({
 }) {
   // Map uploaded images to variants
   let imageMap = {};
-  files.forEach((file) => {
-    const [variantId] = file.originalname.split("_");
-    if (!imageMap[variantId]) imageMap[variantId] = [];
-    imageMap[variantId].push(file.path);
+  (files || []).forEach((file) => {
+    let key = null;
+    // Preferred: fieldname like `images_<tempId>`; take everything after the prefix to preserve underscores in tempId
+    if (file.fieldname && file.fieldname.startsWith("images_")) {
+      key = file.fieldname.slice("images_".length);
+    }
+    // Backward-compatible fallback: originalname like `${tempId}_filename.ext` (note: ambiguous if tempId contains underscores)
+    if (!key && file.originalname && file.originalname.includes("_")) {
+      key = file.originalname.split("_")[0];
+    }
+    if (key) {
+      if (!imageMap[key]) imageMap[key] = [];
+      imageMap[key].push(file.path);
+    }
   });
 
   const productVariants = [];
