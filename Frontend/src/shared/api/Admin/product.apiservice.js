@@ -3,7 +3,12 @@ import httpClient from "../http.js";
 export const getAllProducts = async (page = 1, limit = 10) => {
   try {
     const response = await httpClient.get("/product", {
-      params: { page, limit },
+      params: {
+        page,
+        limit,
+        // Admin should see all products, including out-of-stock
+        // Don't pass inStock parameter so backend returns all products
+      },
     });
     return response.data;
   } catch (error) {

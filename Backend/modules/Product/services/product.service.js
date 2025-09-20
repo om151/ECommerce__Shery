@@ -248,6 +248,33 @@ async function getProductFiltersService() {
   }
 }
 
+// --- Get Single Product by ID ---
+async function getProductByIdService(productId) {
+  try {
+    const product = await Product.findOne({
+      _id: productId,
+      isDeleted: { $ne: true },
+    })
+      .populate({
+        path: "variants",
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: "inventoryId",
+          model: "Inventory",
+        },
+      })
+      .lean();
+
+    if (!product || !product.variants || product.variants.length === 0) {
+      return null;
+    }
+
+    return product;
+  } catch (error) {
+    throw new Error("Failed to fetch product: " + error.message);
+  }
+}
+
 // --- Edit Variant ---
 async function editVariantService(variantId, updateData, files) {
   const variant = await ProductVariant.findById(variantId);
@@ -450,4 +477,5 @@ module.exports = {
   deleteProductService,
   listAllProductsService,
   getProductFiltersService,
+  getProductByIdService,
 };

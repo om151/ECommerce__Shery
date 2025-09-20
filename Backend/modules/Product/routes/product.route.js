@@ -130,4 +130,7 @@ router.get("/", productController.listAllProducts);
 // --- Public: Get filter options ---
 router.get("/filters", productController.getProductFilters);
 
+// --- Public: Get single product by ID ---
+router.get("/:productId", productController.getProductById);
+
 module.exports = router;

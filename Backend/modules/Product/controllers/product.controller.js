@@ -12,6 +12,7 @@ const {
   deleteProductService,
   listAllProductsService,
   getProductFiltersService,
+  getProductByIdService,
 } = require("../services/product.service");
 
 // Edit Product
@@ -140,7 +141,7 @@ exports.listAllProducts = asyncHandler(async (req, res) => {
     brand,
     color,
     size,
-    inStock = true,
+    inStock,
   } = req.query;
 
   const options = {
@@ -154,7 +155,7 @@ exports.listAllProducts = asyncHandler(async (req, res) => {
     brand,
     color,
     size,
-    inStock: inStock === "true",
+    inStock: inStock !== undefined ? inStock === "true" : undefined,
   };
 
   const result = await listAllProductsService(page, limit, options);
@@ -171,5 +172,23 @@ exports.getProductFilters = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     filters,
+  });
+});
+
+// Get Single Product by ID (public)
+exports.getProductById = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const product = await getProductByIdService(productId);
+
+  if (!product) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    product,
   });
 });
