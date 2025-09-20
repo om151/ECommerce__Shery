@@ -132,7 +132,7 @@ export const createProductActions = (dispatch) => ({
   createProduct: useCallback(
     async (productData) => {
       try {
-        console.log("Creating product with data:", productData);
+        // console.log("Creating product with data:", productData);
         const response = await apiCreateProductWithVariants(productData);
         return { type: "admin/createProduct/fulfilled", payload: response };
       } catch (error) {

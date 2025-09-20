@@ -22,7 +22,7 @@ const VarientList = ({setEditingVariantId, setEditingVariant, handelVariantDelet
                       <button
                         className="px-3 py-1 text-sm border rounded hover:bg-gray-50"
                         onClick={() => {
-                          console.log(v);
+                          
                           setEditingVariantId(v._id);
                           setEditingVariant({
                             name: v.name || "",

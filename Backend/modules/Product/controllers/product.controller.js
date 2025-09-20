@@ -108,7 +108,6 @@ exports.addProductWithVariants = asyncHandler(async (req, res) => {
 // Delete Variant from Product
 exports.deleteVariantFromProduct = asyncHandler(async (req, res) => {
   const { variantId } = req.params;
-  console.log("Deleting variant:", variantId);
   await deleteVariantFromProductService(variantId);
   res
     .status(200)

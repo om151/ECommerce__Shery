@@ -46,7 +46,7 @@ httpClient.interceptors.request.use(
     }
 
     // Log the request for debugging (remove in production)
-    console.log("Making request to:", config.baseURL + config.url);
+    // console.log("Making request to:", config.baseURL + config.url);
 
     return config;
   },
@@ -61,7 +61,7 @@ httpClient.interceptors.request.use(
 httpClient.interceptors.response.use(
   (response) => {
     // Log successful responses for debugging (remove in production)
-    console.log("Response received:", response.status, response.config.url);
+    // console.log("Response received:", response.status, response.config.url);
 
     // Return the response data directly
     return response;

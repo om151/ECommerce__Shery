@@ -146,12 +146,12 @@ export const useAdmin = () => {
 
     fetchUsers: useCallback(
       async (page = 1, limit = 10) => {
-        console.log("Fetching users, page:", page, "limit:", limit);
+        // console.log("Fetching users, page:", page, "limit:", limit);
         dispatch(setUsersLoading(true));
         dispatch(clearUsersError());
         try {
           const response = await apiGetAllUsers(page, limit);
-          console.log("Users API response:", response);
+          // console.log("Users API response:", response);
           dispatch(setUsers(response));
           dispatch(setUsersLoading(false));
           return { type: "admin/fetchUsers/fulfilled", payload: response };
@@ -172,12 +172,12 @@ export const useAdmin = () => {
 
     fetchOrders: useCallback(
       async (page = 1, limit = 10) => {
-        console.log("Fetching orders, page:", page, "limit:", limit);
+        // console.log("Fetching orders, page:", page, "limit:", limit);
         dispatch(setAdminOrdersLoading(true));
         dispatch(clearAdminOrdersError());
         try {
           const response = await apiGetAllOrders(page, limit);
-          console.log("Orders API response:", response);
+          // console.log("Orders API response:", response);
           dispatch(setAdminOrders(response));
            dispatch(setAdminOrdersLoading(false));
           return { type: "admin/fetchOrders/fulfilled", payload: response };
@@ -215,12 +215,12 @@ export const useAdmin = () => {
 
     fetchProducts: useCallback(
       async (page = 1, limit = 10) => {
-        console.log("Fetching products, page:", page, "limit:", limit);
+        // console.log("Fetching products, page:", page, "limit:", limit);
         dispatch(setAdminProductsLoading(true));
         dispatch(clearAdminProductsError());
         try {
           const response = await apiGetAllProducts(page, limit);
-          console.log("Products API response:", response);
+          // console.log("Products API response:", response);
           dispatch(setAdminProducts(response));
           dispatch(setAdminProductsLoading(false));
           return { type: "admin/fetchProducts/fulfilled", payload: response };
@@ -258,12 +258,12 @@ export const useAdmin = () => {
 
     fetchCoupons: useCallback(
       async (page = 1, limit = 10) => {
-        console.log("Fetching coupons, page:", page, "limit:", limit);
+        // console.log("Fetching coupons, page:", page, "limit:", limit);
         dispatch(setCouponsLoading(true));
         dispatch(clearCouponsError());
         try {
           const response = await apiGetAllCoupons(page, limit);
-          console.log("Coupons API response:", response);
+          // console.log("Coupons API response:", response);
           dispatch(setCoupons(response));
           dispatch(setCouponsLoading(false));
           return { type: "admin/fetchCoupons/fulfilled", payload: response };
@@ -284,15 +284,15 @@ export const useAdmin = () => {
 
     // Initialize admin dashboard data
     initializeAdminDashboard: useCallback(async () => {
-      console.log("Initializing admin dashboard...");
+      // console.log("Initializing admin dashboard...");
       try {
         // Set loading state first
         dispatch(setStatsLoading(true));
 
-        console.log("Fetching admin stats...");
+        // console.log("Fetching admin stats...");
         const statsPromise = apiGetAdminStats()
           .then((response) => {
-            console.log("Stats response:", response);
+            // console.log("Stats response:", response);
             dispatch(setStats(response));
             return response;
           })
@@ -302,7 +302,7 @@ export const useAdmin = () => {
             return null;
           });
 
-        console.log("Fetching recent orders...");
+        // console.log("Fetching recent orders...");
         const ordersPromise = apiGetRecentOrders(5)
           .then((response) => {
             console.log("Recent orders response:", response);
@@ -314,10 +314,10 @@ export const useAdmin = () => {
             return null;
           });
 
-        console.log("Fetching low stock products...");
+        // console.log("Fetching low stock products...");
         const lowStockPromise = apiGetLowStockProducts(5)
           .then((response) => {
-            console.log("Low stock products response:", response);
+            // console.log("Low stock products response:", response);
             dispatch(setLowStockProducts(response));
             return response;
           })
@@ -334,7 +334,7 @@ export const useAdmin = () => {
         ]);
 
         dispatch(setStatsLoading(false));
-        console.log("Admin dashboard initialization complete");
+        // console.log("Admin dashboard initialization complete");
       } catch (error) {
         console.error("Failed to initialize admin dashboard:", error);
         dispatch(setStatsLoading(false));
@@ -345,10 +345,10 @@ export const useAdmin = () => {
     // Update a product
     updateProduct: useCallback(
       async (productId, productData) => {
-        console.log("Updating product:", productId, productData);
+        // console.log("Updating product:", productId, productData);
         try {
           const response = await apiUpdateProduct(productId, productData);
-          console.log("Product update response:", response);
+          // console.log("Product update response:", response);
           return { type: "admin/updateProduct/fulfilled", payload: response };
         } catch (error) {
           console.error("Failed to update product:", error);

@@ -38,7 +38,7 @@ async function addToCart(userId, productId, variantId, quantity) {
   if (!product) throw new Error("Product not found");
   if (!variant) throw new Error("Variant not found");
 
-  console.log(variant, productId);
+
   // Ensure the variant belongs to the product
   if (
     variant.productId &&

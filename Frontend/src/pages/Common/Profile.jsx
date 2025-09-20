@@ -193,7 +193,6 @@ const Profile = () => {
       setProfileSuccess("Profile updated successfully!");
 
       setTimeout(() => setProfileSuccess(""), 5000);
-      console.log();
     } catch (error) {
       console.error("Error updating profile:", error);
 

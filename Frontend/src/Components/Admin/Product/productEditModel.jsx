@@ -122,7 +122,6 @@ const ProductEditModal = ({ product, onClose, onSave }) => {
         images: newVariant.images,
       };
       const created = await addVariantToProduct(product._id, payload);
-      console.log("Variant added:", created);
       // optimistic add; backend returns created variant
       setVariants((prev) => [
         created?.payload?.variant || created || payload,
@@ -158,9 +157,7 @@ const ProductEditModal = ({ product, onClose, onSave }) => {
        },
         searchKeywords: editedProduct.searchKeywords,
       };
-      console.log("Saving product with data:", payload);
       await updateProduct(product._id, payload);
-      console.log("Product saved successfully");
       onSave();
     } catch (error) {
       console.error("Failed to save product:", error);

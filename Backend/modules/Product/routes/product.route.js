@@ -77,7 +77,6 @@ router.put(
   adminAuthMiddleware,
   upload.array("images", 20),
   async (req, res, next) => {
-    console.log("Files received:", req.body);
     next();
   },
   parseProductFormData,

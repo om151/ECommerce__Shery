@@ -76,7 +76,7 @@ const ProductCard = ({ product, className = "", ...props }) => {
       });
 
       // Success feedback could be a toast notification in real app
-      console.log("Added to cart successfully");
+      
     } catch (error) {
       console.error("Error adding to cart:", error);
       alert("Failed to add item to cart");

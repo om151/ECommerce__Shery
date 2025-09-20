@@ -42,10 +42,10 @@ dispatch(setStatsLoading(true));
 try {
 //  dispatch(setStatsLoading(true));
 
-        console.log("Fetching admin stats...");
+        // console.log("Fetching admin stats...");
         const statsPromise = apiGetAdminStats()
           .then((response) => {
-            console.log("Stats response:", response);
+            // console.log("Stats response:", response);
             dispatch(setStats(response));
             return response;
           })
@@ -55,10 +55,10 @@ try {
             return null;
           });
 
-        console.log("Fetching recent orders...");
+        // console.log("Fetching recent orders...");
         const ordersPromise = getRecentOrders(5)
           .then((response) => {
-            console.log("Recent orders response:", response);
+            // console.log("Recent orders response:", response);
             dispatch(setRecentOrders(response));
             return response;
           })
@@ -67,10 +67,10 @@ try {
             return null;
           });
 
-        console.log("Fetching low stock products...");
+        // console.log("Fetching low stock products...");
         const lowStockPromise = getLowStockProducts(5)
           .then((response) => {
-            console.log("Low stock products response:", response);
+            // console.log("Low stock products response:", response);
             dispatch(setLowStockProducts(response));
             return response;
           })
@@ -87,7 +87,7 @@ try {
         ]);
 
         dispatch(setStatsLoading(false));
-        console.log("Admin dashboard initialization complete");
+        // console.log("Admin dashboard initialization complete");
       } catch (error) {
         console.error("Failed to initialize admin dashboard:", error);
         dispatch(setStatsLoading(false));

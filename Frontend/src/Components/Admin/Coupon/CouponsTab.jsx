@@ -128,7 +128,6 @@ const CouponsTab = () => {
     }
   }, [currentPage]);
   const handleCreateCoupon = () => {
-    console.log("Creating coupon");
     setIsCreating(true);
   };
   const handleEditCoupon = (c) => setEditing(c);
