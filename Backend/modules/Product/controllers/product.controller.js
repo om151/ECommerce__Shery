@@ -11,6 +11,7 @@ const {
   deleteVariantFromProductService,
   deleteProductService,
   listAllProductsService,
+  getProductFiltersService,
 } = require("../services/product.service");
 
 // Edit Product
@@ -124,21 +125,51 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   });
 });
 
-// Get All Products (public) with pagination
+// Get All Products (public) with pagination, search, and filters
 exports.listAllProducts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, lowStock } = req.query;
-  let result;
+  const {
+    page = 1,
+    limit = 20,
+    lowStock,
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    brand,
+    color,
+    size,
+    inStock = true,
+  } = req.query;
 
-  if (lowStock) {
-    // If lowStock is provided, filter products with inventory below threshold
-    const threshold = Number(lowStock);
-    result = await listAllProductsService(page, limit, { lowStock: threshold });
-  } else {
-    result = await listAllProductsService(page, limit);
-  }
+  const options = {
+    lowStock: lowStock ? Number(lowStock) : undefined,
+    search,
+    category,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    sortBy,
+    sortOrder,
+    brand,
+    color,
+    size,
+    inStock: inStock === "true",
+  };
+
+  const result = await listAllProductsService(page, limit, options);
 
   res.status(200).json({
     success: true,
     ...result,
+  });
+});
+
+// Get Filter Options (categories, brands, colors, sizes, price range)
+exports.getProductFilters = asyncHandler(async (req, res) => {
+  const filters = await getProductFiltersService();
+  res.status(200).json({
+    success: true,
+    filters,
   });
 });

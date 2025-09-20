@@ -17,10 +17,16 @@ import { useCart } from "../../store/Hooks/User/hook.useCart.js";
  * @param {Array} props.product.variants - Product variants array
  * @param {number} props.product.rating - Product rating
  * @param {Array} props.product.categories - Product categories
+ * @param {string} props.viewMode - View mode: 'grid' or 'list'
  * @param {string} props.className - Additional CSS classes
  * @returns {React.Component} Product card component
  */
-const ProductCard = ({ product, className = "", ...props }) => {
+const ProductCard = ({
+  product,
+  viewMode = "grid",
+  className = "",
+  ...props
+}) => {
   // Get cart and auth context
   const { addToCart, isLoading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
@@ -76,7 +82,6 @@ const ProductCard = ({ product, className = "", ...props }) => {
       });
 
       // Success feedback could be a toast notification in real app
-      
     } catch (error) {
       console.error("Error adding to cart:", error);
       alert("Failed to add item to cart");

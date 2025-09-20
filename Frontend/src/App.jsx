@@ -24,6 +24,7 @@ import Cart from "./pages/User/Cart.jsx";
 import Checkout from "./pages/User/Checkout.jsx";
 import Home from "./pages/User/Home.jsx";
 import Product from "./pages/User/Product.jsx";
+import Products from "./pages/User/Products.jsx";
 
 // Import route protection components
 import AdminProtectedRoute from "./utils/AdminProtectedRoute.jsx";
@@ -61,6 +62,12 @@ function App() {
             <Route
               path="/"
               element={isAdmin ? <Navigate to="/admin" replace /> : <Home />}
+            />
+            <Route
+              path="/products"
+              element={
+                isAdmin ? <Navigate to="/admin" replace /> : <Products />
+              }
             />
             <Route
               path="/product/:id"
