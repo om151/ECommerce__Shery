@@ -150,12 +150,12 @@ const UsersTab = () => {
                       </span>
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
-                          user.isActive
+                          user.emailVerified
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {user.isActive ? "Verified" : "Unverified"}
+                        {user.emailVerified ? "Verified" : "Unverified"}
                       </span>
                     </div>
                   </div>

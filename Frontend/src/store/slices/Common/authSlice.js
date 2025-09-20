@@ -49,9 +49,9 @@ const authSlice = createSlice({
 
     // Registration success
     registerSuccess: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.isAuthenticated = true;
+      // state.user = action.payload.user;
+      // state.token = action.payload.token;
+      // state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
 
