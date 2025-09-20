@@ -11,9 +11,91 @@ const ProductsTab = () => {
   const [showCreateModal, setShowCreateModal] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(null);
 
+  // Filters
+  const PAGE_SIZE = 10;
+  const [searchTitle, setSearchTitle] = React.useState("");
+  const [minPrice, setMinPrice] = React.useState("");
+  const [maxPrice, setMaxPrice] = React.useState("");
+  const [category, setCategory] = React.useState("all");
+  const [brand, setBrand] = React.useState("all");
+
+  // Fetch a larger page once and do client-side filtering + pagination
   React.useEffect(() => {
-    fetchProducts(currentPage, 10);
-  }, [currentPage, fetchProducts]);
+    fetchProducts(1, 1000);
+  }, [fetchProducts]);
+
+  const allProducts = products.list || [];
+
+  // Derive category and brand options from data
+  const categoryOptions = React.useMemo(() => {
+    const set = new Set();
+    allProducts.forEach((p) => (p.categories || []).forEach((c) => set.add(c)));
+    return ["all", ...Array.from(set).sort()];
+  }, [allProducts]);
+
+  const brandOptions = React.useMemo(() => {
+    const set = new Set();
+    allProducts.forEach((p) => {
+      const b = p.attributes?.brand;
+      if (b) set.add(b);
+    });
+    return ["all", ...Array.from(set).sort()];
+  }, [allProducts]);
+
+  // Filtered products: title, price range across any variant, category, brand
+  const filteredProducts = React.useMemo(() => {
+    const term = (searchTitle || "").trim().toLowerCase();
+    const hasMin = minPrice !== "" && !Number.isNaN(Number(minPrice));
+    const hasMax = maxPrice !== "" && !Number.isNaN(Number(maxPrice));
+    const min = hasMin ? Number(minPrice) : -Infinity;
+    const max = hasMax ? Number(maxPrice) : Infinity;
+
+    return allProducts.filter((p) => {
+      // Title filter
+      if (term && !(p.title || "").toLowerCase().includes(term)) return false;
+      // Category filter
+      if (category !== "all") {
+        const cats = p.categories || [];
+        if (!cats.includes(category)) return false;
+      }
+      // Brand filter
+      if (brand !== "all") {
+        if ((p.attributes?.brand || "") !== brand) return false;
+      }
+      // Price range filter: any variant within range qualifies the product
+      const variants = p.variants || [];
+      const matchesPrice = variants.some((v) => {
+        const price = Number(v?.price);
+        return Number.isFinite(price) && price >= min && price <= max;
+      });
+      if ((hasMin || hasMax) && !matchesPrice) return false;
+      return true;
+    });
+  }, [allProducts, searchTitle, minPrice, maxPrice, category, brand]);
+
+  // Reset to page 1 whenever filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTitle, minPrice, maxPrice, category, brand]);
+
+  // Current page slice
+  const pagedProducts = React.useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = currentPage * PAGE_SIZE;
+    return filteredProducts.slice(start, end);
+  }, [filteredProducts, currentPage]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PAGE_SIZE)
+  );
+
+  // Scroll to top on page change
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
@@ -45,7 +127,7 @@ const ProductsTab = () => {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => fetchProducts(currentPage, 10)}
+            onClick={() => fetchProducts(1, 1000)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Refresh
@@ -56,6 +138,72 @@ const ProductsTab = () => {
           >
             Create Product
           </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-w-0">
+          <input
+            type="text"
+            value={searchTitle}
+            onChange={(e) => setSearchTitle(e.target.value)}
+            placeholder="Search by title"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <input
+            type="number"
+            min="0"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="Min price"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <input
+            type="number"
+            min="0"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="Max price"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            {categoryOptions.map((c) => (
+              <option key={c} value={c}>
+                {c === "all" ? "All Categories" : c}
+              </option>
+            ))}
+          </select>
+          <select
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            {brandOptions.map((b) => (
+              <option key={b} value={b}>
+                {b === "all" ? "All Brands" : b}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              setSearchTitle("");
+              setMinPrice("");
+              setMaxPrice("");
+              setCategory("all");
+              setBrand("all");
+            }}
+            className="w-full px-3 py-2 border rounded-md hover:bg-gray-50"
+          >
+            Clear
+          </button>
+        </div>
+        <div className="text-xs text-gray-500 mt-2">
+          Showing {filteredProducts.length} results
         </div>
       </div>
 
@@ -89,18 +237,18 @@ const ProductsTab = () => {
             </div>
           ))}
         </div>
-      ) : products.list?.length > 0 ? (
+      ) : filteredProducts.length > 0 ? (
         <>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Products ({products.total})
+                  Products ({filteredProducts.length})
                 </h3>
               </div>
             </div>
             <div className="divide-y divide-gray-200">
-              {products.list.map((product) => (
+              {pagedProducts.map((product) => (
                 <div
                   key={product._id}
                   className="p-6 hover:bg-gray-50 transition-colors"
@@ -182,7 +330,7 @@ const ProductsTab = () => {
                             setIsDeleting(product._id);
                             try {
                               await deleteProduct(product._id);
-                              await fetchProducts(currentPage, 10);
+                              await fetchProducts(1, 1000);
                             } catch (e) {
                               console.error("Delete product failed", e);
                               alert(e.message || "Failed to delete product");
@@ -203,8 +351,8 @@ const ProductsTab = () => {
             </div>
           </div>
 
-          {/* Pagination */}
-          {products.totalPages > 1 && (
+          {/* Client-side Pagination for filtered results */}
+          {totalPages > 1 && (
             <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -214,15 +362,13 @@ const ProductsTab = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {products.totalPages}
+                Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, products.totalPages)
-                  )
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
-                disabled={currentPage === products.totalPages}
+                disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
@@ -243,7 +389,7 @@ const ProductsTab = () => {
           onClose={closeProductModal}
           onSave={() => {
             // Refresh products after save
-            fetchProducts(currentPage, 10);
+            fetchProducts(1, 1000);
             closeProductModal();
           }}
         />
@@ -253,7 +399,7 @@ const ProductsTab = () => {
         <CreateProductModal
           onClose={() => setShowCreateModal(false)}
           onCreated={async () => {
-            await fetchProducts(1, 10);
+            await fetchProducts(1, 1000);
             setCurrentPage(1);
           }}
         />
