@@ -9,6 +9,7 @@ import { getProductById } from "../../shared/api/User/getProduct.apiService.js";
 import { getProductReviews } from "../../shared/api/User/review.apiService.js";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
+import { useWishlist } from "../../store/Hooks/User/hook.useWishlist.js";
 
 /**
  * Product detail page component
@@ -18,6 +19,11 @@ const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    items: wishlistItems,
+  } = useWishlist();
   const { user } = useAuth();
 
   // Product data state
@@ -32,6 +38,12 @@ const Product = () => {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Check if product is in wishlist
+  const isInWishlist = product
+    ? wishlistItems.some((item) => item.product._id === product._id)
+    : false;
 
   // Review state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -168,6 +180,36 @@ const Product = () => {
     }
   };
 
+  /**
+   * Handle wishlist toggle
+   */
+  const handleWishlistToggle = async () => {
+    if (!user) {
+      navigate("/login", { state: { from: `/product/${id}` } });
+      return;
+    }
+
+    if (!product) return;
+
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(product._id);
+      } else {
+        await addToWishlist({ productId: product._id });
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      alert(
+        isInWishlist
+          ? "Failed to remove from wishlist"
+          : "Failed to add to wishlist"
+      );
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
@@ -286,10 +328,22 @@ const Product = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-3">
-              <button className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all">
+              <button
+                onClick={handleWishlistToggle}
+                disabled={wishlistLoading}
+                className={`p-2.5 rounded-full transition-all ${
+                  isInWishlist
+                    ? "text-red-500 bg-red-50 hover:bg-red-100"
+                    : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                } ${wishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={
+                  isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+                }
+              >
                 <svg
                   className="w-5 h-5"
-                  fill="currentColor"
+                  fill={isInWishlist ? "currentColor" : "none"}
+                  stroke="currentColor"
                   viewBox="0 0 20 20"
                 >
                   <path

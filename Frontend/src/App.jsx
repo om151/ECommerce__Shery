@@ -25,6 +25,7 @@ import Checkout from "./pages/User/Checkout.jsx";
 import Home from "./pages/User/Home.jsx";
 import Product from "./pages/User/Product.jsx";
 import Products from "./pages/User/Products.jsx";
+import Wishlist from "./pages/User/Wishlist.jsx";
 
 // Import route protection components
 import AdminProtectedRoute from "./utils/AdminProtectedRoute.jsx";
@@ -80,6 +81,12 @@ function App() {
             <Route
               path="/cart"
               element={isAdmin ? <Navigate to="/admin" replace /> : <Cart />}
+            />
+            <Route
+              path="/wishlist"
+              element={
+                isAdmin ? <Navigate to="/admin" replace /> : <Wishlist />
+              }
             />
 
             {/* Protected routes - require authentication */}

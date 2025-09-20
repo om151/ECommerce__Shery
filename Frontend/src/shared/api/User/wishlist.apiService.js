@@ -9,7 +9,6 @@ export const getWishlist = async () => {
   }
 };
 
-
 export const addToWishlist = async (wishlistData) => {
   try {
     const response = await httpClient.post("/wishlist/add", wishlistData);
@@ -19,10 +18,9 @@ export const addToWishlist = async (wishlistData) => {
   }
 };
 
-
-export const removeFromWishlist = async (wishlistData) => {
+export const removeFromWishlist = async (productId) => {
   try {
-    const response = await httpClient.post("/wishlist/remove", wishlistData);
+    const response = await httpClient.post("/wishlist/remove", { productId });
     return response.data;
   } catch (error) {
     throw error;

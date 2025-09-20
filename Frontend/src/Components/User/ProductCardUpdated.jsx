@@ -2,11 +2,12 @@
 // This component is used in product listings, search results, and recommendations
 // Supports both grid and list view modes
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
+import { useWishlist } from "../../store/Hooks/User/hook.useWishlist.js";
 
 /**
  * ProductCard component for displaying product information
@@ -28,9 +29,23 @@ const ProductCard = ({
   className = "",
   ...props
 }) => {
-  // Get cart and auth context
+  // Get cart, wishlist, and auth context
+  const navigate = useNavigate();
   const { addToCart, isLoading: cartLoading } = useCart();
-  const { isAuthenticated } = useAuth();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    items: wishlistItems,
+  } = useWishlist();
+  const { user, isAuthenticated } = useAuth();
+
+  // Local state for wishlist loading
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Check if product is in wishlist
+  const isInWishlist = wishlistItems.some(
+    (item) => item.product._id === product._id
+  );
 
   // Handle case where product is null/undefined
   if (!product) {
@@ -90,6 +105,39 @@ const ProductCard = ({
     }
   };
 
+  /**
+   * Handle toggling wishlist
+   */
+  const handleWishlistToggle = async (e) => {
+    // Prevent event bubbling to parent Link
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Check if user is authenticated
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(product._id);
+      } else {
+        await addToWishlist({ productId: product._id });
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      alert(
+        isInWishlist
+          ? "Failed to remove from wishlist"
+          : "Failed to add to wishlist"
+      );
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
   // Grid view layout
   if (viewMode === "grid") {
     return (
@@ -140,12 +188,21 @@ const ProductCard = ({
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button className="bg-white p-2 rounded-full shadow-md hover:shadow-lg transition-shadow duration-200">
+          {/* Wishlist Button */}
+          <div className="absolute top-2 right-2">
+            <button
+              onClick={handleWishlistToggle}
+              disabled={wishlistLoading}
+              className={`p-2 rounded-full shadow-md hover:shadow-lg transition-all duration-200 ${
+                isInWishlist
+                  ? "bg-red-500 text-white"
+                  : "bg-white text-gray-600 hover:text-red-500"
+              } ${wishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+              title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            >
               <svg
-                className="w-4 h-4 text-gray-600 hover:text-red-500"
-                fill="none"
+                className="w-4 h-4"
+                fill={isInWishlist ? "currentColor" : "none"}
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -360,10 +417,21 @@ const ProductCard = ({
 
             {/* Actions */}
             <div className="flex flex-col gap-2 ml-4">
-              <button className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors duration-200">
+              <button
+                onClick={handleWishlistToggle}
+                disabled={wishlistLoading}
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isInWishlist
+                    ? "text-red-500 bg-red-50 hover:bg-red-100"
+                    : "text-gray-400 hover:text-red-500 hover:bg-gray-100"
+                } ${wishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={
+                  isInWishlist ? "Remove from wishlist" : "Add to wishlist"
+                }
+              >
                 <svg
                   className="w-5 h-5"
-                  fill="none"
+                  fill={isInWishlist ? "currentColor" : "none"}
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >

@@ -58,7 +58,12 @@ const Products = () => {
 
   // Handle filter changes
   const handleFilterChange = (key, value) => {
-    applyFilter(key, value);
+    // Handle inStock filter specially - when unchecked, send empty string
+    if (key === "inStock" && value === false) {
+      applyFilter(key, "");
+    } else {
+      applyFilter(key, value);
+    }
   };
 
   // Handle price range filter
@@ -407,7 +412,7 @@ const Products = () => {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={filters.inStock}
+                      checked={filters.inStock === true}
                       onChange={(e) =>
                         handleFilterChange("inStock", e.target.checked)
                       }

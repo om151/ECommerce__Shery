@@ -32,7 +32,7 @@ const initialState = {
     size: "",
     minPrice: "",
     maxPrice: "",
-    inStock: true,
+    inStock: "", // Allow both in-stock and out-of-stock products by default
     sortBy: "createdAt",
     sortOrder: "desc",
   },
@@ -124,7 +124,7 @@ const productsSlice = createSlice({
         size: "",
         minPrice: "",
         maxPrice: "",
-        inStock: true,
+        inStock: "", // Allow both in-stock and out-of-stock products by default
         sortBy: "createdAt",
         sortOrder: "desc",
       };

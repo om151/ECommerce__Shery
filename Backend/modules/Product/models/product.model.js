@@ -11,7 +11,11 @@ const ProductVariantSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   compareAtPrice: { type: Number, required: true },
   images: { type: [String] }, // require : true
-  inventoryId: { type: String, required: true },
+  inventoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Inventory",
+    required: true,
+  },
   isDeleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

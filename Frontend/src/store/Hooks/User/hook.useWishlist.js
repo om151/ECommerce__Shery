@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -19,7 +18,6 @@ import {
 export const useAppDispatch = () => useDispatch();
 export const useAppSelector = useSelector;
 
-
 export const useWishlist = () => {
   const dispatch = useAppDispatch();
   const wishlistState = useAppSelector((state) => state.user.wishlist);
@@ -37,7 +35,7 @@ export const useWishlist = () => {
       dispatch(clearWishlistError());
       try {
         const response = await apiGetWishlist();
-        dispatch(setWishlistItems(response.wishlist?.items || []));
+        dispatch(setWishlistItems(response.wishlist?.products || []));
         return { type: "wishlist/fetchWishlist/fulfilled", payload: response };
       } catch (error) {
         const errorMessage =
