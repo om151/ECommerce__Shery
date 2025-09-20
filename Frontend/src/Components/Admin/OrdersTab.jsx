@@ -1,19 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
 
 const OrdersTab = () => {
   // Note: allOrders lives under orders slice (orders.allOrders), not top-level
   const { orders, fetchOrders, ui, fetchAllOrders } = useAdmin();
   const [currentPage, setCurrentPage] = React.useState(1);
-
   const [showOrders, setShowOrders] = useState([]);
-
   const [searchOrder, setSearchOrder] = useState("");
   const [searchType, setSearchType] = useState("orderNumber");
-  
+  const PAGE_SIZE = 10;
+
   const allOrders = orders?.allOrders || [];
 
-  const totalPage = Math.ceil(allOrders.length/10) || 1;
+  // Build filtered list based on search term and type
+  const filteredOrders = useMemo(() => {
+    const term = (searchOrder || "").trim().toLowerCase();
+    if (!term) return allOrders;
+    if (searchType === "orderNumber") {
+      return allOrders.filter((order) =>
+        String(order.orderNumber || "")
+          .toLowerCase()
+          .includes(term)
+      );
+    }
+    if (searchType === "customerEmail") {
+      return allOrders.filter((order) =>
+        String(order.userId?.email || order.customerEmail || "")
+          .toLowerCase()
+          .includes(term)
+      );
+    }
+    return allOrders;
+  }, [allOrders, searchOrder, searchType]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
 
   // useEffect(() => {
   //   if (orders.list) {
@@ -24,36 +44,25 @@ const OrdersTab = () => {
   // console.log("All Orders:", allOrders);
 
   React.useEffect(() => {
-    setShowOrders(allOrders.slice((currentPage-1)*10, currentPage*10));
-  }, [currentPage,orders]);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = currentPage * PAGE_SIZE;
+    setShowOrders(filteredOrders.slice(start, end));
+    // Scroll to top whenever page changes
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage, filteredOrders]);
 
   useEffect(() => {
     fetchAllOrders();
-  }, []);
+  }, [fetchAllOrders]);
 
   // Access the full orders list from nested state
-  
 
   const handleOrderSearch = (value) => {
-
-    if(searchType==="orderNumber"){
-      setSearchOrder(value);
-            const filteredOrders = allOrders.filter((order) =>
-              order.orderNumber
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase())
-            );
-             setShowOrders(filteredOrders);
-    }else if(searchType==="customerEmail"){
-      setSearchOrder(value);
-      const filteredOrders = allOrders.filter((order) =>
-        order.userId?.email.toLowerCase().includes(value.toLowerCase())
-      );
-      setShowOrders(filteredOrders);
-    }
-
-  }
+    setSearchOrder(value);
+    setCurrentPage(1); // reset to first page on search change
+  };
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("en-IN", {
@@ -96,7 +105,11 @@ const OrdersTab = () => {
           onChange={(e) => {
             handleOrderSearch(e.target.value);
           }}
-          placeholder={searchType === "orderNumber" ? "Search by order number" : "Search by customer email"}
+          placeholder={
+            searchType === "orderNumber"
+              ? "Search by order number"
+              : "Search by customer email"
+          }
           className="px-4 py-2 border border-gray-300 rounded-md mr-2 mb-4 w-full md:w-1/3"
         />
         <select
@@ -105,7 +118,7 @@ const OrdersTab = () => {
           className="px-4 py-2 border border-gray-300 rounded-md mb-4 w-full md:w-1/3"
         >
           <option value="orderNumber">Order Number</option>
-          <option value="customerEmail" disabled >Customer Email</option>  
+          <option value="customerEmail">Customer Email</option>
         </select>
       </div>
 
@@ -144,7 +157,7 @@ const OrdersTab = () => {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Orders ({searchOrder ? showOrders.length : allOrders.length})
+                  Orders ({filteredOrders.length})
                 </h3>
               </div>
             </div>
@@ -203,7 +216,7 @@ const OrdersTab = () => {
             </div>
           </div>
 
-          {totalPage > 1 && !searchOrder && (
+          {totalPages > 1 && (
             <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -213,13 +226,13 @@ const OrdersTab = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPage}
+                Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPage))
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
                 }
-                disabled={currentPage === totalPage}
+                disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next

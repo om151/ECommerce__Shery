@@ -1,25 +1,30 @@
 import React, { useEffect } from "react";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js";
-import { use } from "react";
 
 const UsersTab = () => {
   const { users, fetchUsers, ui } = useAdmin();
   const [currentPage, setCurrentPage] = React.useState(1);
-
   const [showUser, setShowUser] = React.useState([]);
-
   const [searchUser, setSearchUser] = React.useState("");
 
+  const PAGE_SIZE = 10;
   const allUsers = users.list || [];
 
-  const totalPage = Math.ceil(allUsers.length/10) || 1;
-
-  const handleSearch = async (value) => {
-    setSearchUser(value);
-    const filteredUsers = allUsers.filter((user) =>
-      user.email.toLowerCase().includes(value.toLowerCase())
+  // Filtered list derived from search term
+  const filteredUsers = React.useMemo(() => {
+    const term = (searchUser || "").trim().toLowerCase();
+    if (!term) return allUsers;
+    return allUsers.filter((user) =>
+      (user.email || "").toLowerCase().includes(term)
     );
-    setShowUser(filteredUsers);
+  }, [allUsers, searchUser]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+
+  const handleSearch = (value) => {
+    setSearchUser(value);
+    // reset to first page whenever search changes
+    setCurrentPage(1);
   };
 
   // React.useEffect(() => {
@@ -29,12 +34,19 @@ const UsersTab = () => {
   // }, [users]);
 
   useEffect(() => {
+    // Fetch a larger page to enable client-side filtering
     fetchUsers();
   }, [fetchUsers]);
 
-  React.useEffect(() => {
-    setShowUser(allUsers.slice((currentPage - 1) * 10, currentPage * 10));
-  }, [currentPage, users]);
+  useEffect(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = currentPage * PAGE_SIZE; // correct slice end index
+    setShowUser(filteredUsers.slice(start, end));
+    // Scroll to top whenever page changes
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage, filteredUsers]);
 
   return (
     <div className="p-6">
@@ -48,7 +60,7 @@ const UsersTab = () => {
           </p>
         </div>
         <button
-          onClick={() => fetchUsers(currentPage, 10)}
+          onClick={() => fetchUsers()}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Refresh
@@ -97,7 +109,7 @@ const UsersTab = () => {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Users ({ searchUser ? showUser.length : allUsers.length })
+                  Users ({filteredUsers.length})
                 </h3>
               </div>
             </div>
@@ -152,7 +164,7 @@ const UsersTab = () => {
             </div>
           </div>
 
-         {totalPage > 1 && !searchUser && (
+          {totalPages > 1 && (
             <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -162,13 +174,13 @@ const UsersTab = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPage}
+                Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPage))
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
                 }
-                disabled={currentPage === totalPage}
+                disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
