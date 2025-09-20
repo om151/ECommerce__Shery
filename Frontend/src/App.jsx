@@ -2,7 +2,12 @@
 // This is the root component that sets up routing
 
 import React, { useEffect } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom";
 
 // Import layout components
 import Footer from "./Components/Common/Footer.jsx";
@@ -10,21 +15,22 @@ import Header from "./Components/Common/Header.jsx";
 
 // Import page components
 import AdminPanel from "./pages/Admin/AdminPanel.jsx";
-import Cart from "./pages/User/Cart.jsx";
-import Checkout from "./pages/User/Checkout.jsx";
+import ForgotPassword from "./pages/Common/ForgotPassword.jsx";
 import Login from "./pages/Common/Login.jsx";
 import Profile from "./pages/Common/Profile.jsx";
-import ForgotPassword from "./pages/Common/ForgotPassword.jsx";
-import Product from "./pages/User/Product.jsx";
 import Register from "./pages/Common/Register.jsx";
 import ResetPassword from "./pages/Common/ResetPassword.jsx";
+import Cart from "./pages/User/Cart.jsx";
+import Checkout from "./pages/User/Checkout.jsx";
 import Home from "./pages/User/Home.jsx";
+import Product from "./pages/User/Product.jsx";
 
 // Import route protection components
 import AdminProtectedRoute from "./utils/AdminProtectedRoute.jsx";
 import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
 // Import app initialization hook
+import { useAuth } from "./store/Hooks/Common/hook.useAuth.js";
 import { useAppInit } from "./store/Hooks/User/hook.useAppInit.js";
 
 /**
@@ -33,6 +39,7 @@ import { useAppInit } from "./store/Hooks/User/hook.useAppInit.js";
  */
 function App() {
   const { initializeApp } = useAppInit();
+  const { isAdmin } = useAuth();
 
   // Initialize app on mount
   useEffect(() => {
@@ -51,13 +58,22 @@ function App() {
         <main className="flex-1">
           <Routes>
             {/* Public routes - accessible to all users */}
-            <Route path="/" element={<Home />} />
-            <Route path="/product/:id" element={<Product />} />
+            <Route
+              path="/"
+              element={isAdmin ? <Navigate to="/admin" replace /> : <Home />}
+            />
+            <Route
+              path="/product/:id"
+              element={isAdmin ? <Navigate to="/admin" replace /> : <Product />}
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/cart" element={<Cart />} />
+            <Route
+              path="/cart"
+              element={isAdmin ? <Navigate to="/admin" replace /> : <Cart />}
+            />
 
             {/* Protected routes - require authentication */}
             <Route
