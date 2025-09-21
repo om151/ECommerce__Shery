@@ -4,6 +4,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
+import ClearCartButton from "../../Components/Common/ClearCartButton.jsx";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 
@@ -20,26 +21,28 @@ const Cart = () => {
   /**
    * Update item quantity in cart
    * @param {string} productId - Product ID
+   * @param {string} variantId - Variant ID
    * @param {number} newQuantity - New quantity
    */
-  const handleUpdateQuantity = (productId, newQuantity) => {
+  const handleUpdateQuantity = (productId, variantId, newQuantity) => {
     if (newQuantity <= 0) {
       // Remove item if quantity is 0 or less
-      handleRemoveItem(productId);
+      handleRemoveItem(productId, variantId);
       return;
     }
 
     // Use the Redux action to update item
-    updateQuantity({ productId, quantity: newQuantity });
+    updateQuantity({ productId, variantId, quantity: newQuantity });
   };
 
   /**
    * Remove item from cart
    * @param {string} productId - Product ID to remove
+   * @param {string} variantId - Variant ID to remove
    */
-  const handleRemoveItem = (productId) => {
+  const handleRemoveItem = (productId, variantId) => {
     // Use the Redux action to remove item
-    removeFromCart({ productId });
+    removeFromCart({ productId, variantId });
   };
 
   /**
@@ -66,11 +69,32 @@ const Cart = () => {
 
   // Calculate cart totals - provide fallback for items
   const cartItems = items || [];
-  const subtotal = cartItems.reduce(
-    (sum, item) =>
-      sum + (item.product?.price || item.price || 0) * item.quantity,
-    0
-  );
+
+  // Debug: Log cart items to see the data structure
+  console.log("🛒 CART DEBUG - Items:", cartItems);
+  if (cartItems.length > 0) {
+    console.log("🛒 CART DEBUG - First item:", cartItems[0]);
+    console.log("🛒 CART DEBUG - Product data:", cartItems[0].product);
+    console.log("🛒 CART DEBUG - Variant data:", cartItems[0].variant);
+    console.log(
+      "🛒 CART DEBUG - Inventory data:",
+      cartItems[0].variant?.inventoryId
+    );
+    console.log(
+      "🛒 CART DEBUG - Stock available:",
+      cartItems[0].variant?.inventoryId?.quantityAvailable
+    );
+  }
+
+  const subtotal = cartItems.reduce((sum, item) => {
+    // Use totalPrice from backend if available, otherwise calculate from variant price
+    if (item.totalPrice) {
+      return sum + item.totalPrice;
+    }
+    // Fallback to variant price * quantity
+    const price = item.variant?.price || item.variantId?.price || 0;
+    return sum + price * item.quantity;
+  }, 0);
   const tax = subtotal * 0.08; // 8% tax rate
   const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
   const total = subtotal + tax + shipping;
@@ -125,6 +149,7 @@ const Cart = () => {
       </div>
     );
   }
+  console.log(cartItems);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -149,12 +174,7 @@ const Cart = () => {
                 <h2 className="text-lg font-medium text-gray-900">
                   Cart Items
                 </h2>
-                <button
-                  onClick={clearCart}
-                  className="text-sm text-red-600 hover:text-red-800 font-medium"
-                >
-                  Clear Cart
-                </button>
+                <ClearCartButton />
               </div>
 
               {/* Cart Items List */}
@@ -169,11 +189,12 @@ const Cart = () => {
                       <div className="flex-shrink-0 w-20 h-20">
                         <img
                           src={
-                            item.product?.image ||
-                            item.image ||
+                            item.variant?.images?.[0] ||
+                            item.variantId?.images?.[0] ||
+                            item.product?.variants?.[0]?.images?.[0] ||
                             "/api/placeholder/80/80"
                           }
-                          alt={item.product?.name || item.name || "Product"}
+                          alt={item.product?.title || "Product"}
                           className="w-full h-full object-cover rounded-md"
                         />
                       </div>
@@ -188,54 +209,39 @@ const Cart = () => {
                               }`}
                               className="text-lg font-medium text-gray-900 hover:text-primary-600"
                             >
-                              {item.product?.name || item.name || "Product"}
+                              {item.product?.title || "Product"}
                             </Link>
 
-                            {(item.product?.category || item.category) && (
+                            {item.product?.categories?.[0] && (
                               <p className="text-sm text-gray-500 mt-1">
-                                Category:{" "}
-                                {item.product?.category || item.category}
+                                Category: {item.product.categories[0]}
                               </p>
                             )}
 
                             <p className="text-lg font-semibold text-gray-900 mt-2">
-                              ${item.product?.price || item.price || 0}
+                              $
+                              {item.variant?.price ||
+                                item.variantId?.price ||
+                                item.totalPrice / item.quantity ||
+                                0}
                             </p>
 
-                            {/* Stock Status */}
-                            <div className="flex items-center mt-2">
-                              {(item.product?.stock || item.stock || 0) > 0 ? (
-                                <span className="inline-flex items-center text-sm text-green-700">
-                                  <svg
-                                    className="w-4 h-4 mr-1"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                  In Stock
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center text-sm text-red-700">
-                                  <svg
-                                    className="w-4 h-4 mr-1"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                  Out of Stock
-                                </span>
-                              )}
-                            </div>
+                            {/* Variant Info */}
+                            {(item.variant?.attributes ||
+                              item.variantId?.attributes) && (
+                              <div className="text-sm text-gray-500 mt-1">
+                                {item.variant?.attributes?.color && (
+                                  <span>
+                                    Color: {item.variant.attributes.color}{" "}
+                                  </span>
+                                )}
+                                {item.variant?.attributes?.size && (
+                                  <span>
+                                    Size: {item.variant.attributes.size}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {/* Quantity and Remove */}
@@ -248,6 +254,7 @@ const Cart = () => {
                                 onClick={() =>
                                   handleUpdateQuantity(
                                     item.product?._id || item.productId,
+                                    item.variantId?._id || item.variantId,
                                     item.quantity - 1
                                   )
                                 }
@@ -264,12 +271,14 @@ const Cart = () => {
                                 onClick={() =>
                                   handleUpdateQuantity(
                                     item.product?._id || item.productId,
+                                    item.variantId?._id || item.variantId,
                                     item.quantity + 1
                                   )
                                 }
                                 disabled={
                                   item.quantity >=
-                                  (item.product?.stock || item.stock || 0)
+                                  (item.variant?.inventoryId
+                                    ?.quantityAvailable || 0)
                                 }
                               >
                                 +
@@ -279,17 +288,21 @@ const Cart = () => {
                             {/* Item Total */}
                             <p className="text-lg font-semibold text-gray-900">
                               $
-                              {(
-                                (item.product?.price || item.price || 0) *
-                                item.quantity
-                              ).toFixed(2)}
+                              {item.totalPrice
+                                ? item.totalPrice.toFixed(2)
+                                : (
+                                    (item.variant?.price ||
+                                      item.variantId?.price ||
+                                      0) * item.quantity
+                                  ).toFixed(2)}
                             </p>
 
                             {/* Remove Button */}
                             <button
                               onClick={() =>
                                 handleRemoveItem(
-                                  item.product?._id || item.productId
+                                  item.product?._id || item.productId,
+                                  item.variantId?._id || item.variantId
                                 )
                               }
                               className="flex items-center text-sm text-red-600 hover:text-red-800 font-medium"
@@ -374,7 +387,8 @@ const Cart = () => {
                   size="lg"
                   className="w-full"
                   disabled={cartItems.some(
-                    (item) => (item.product?.stock || item.stock || 0) === 0
+                    (item) =>
+                      (item.variant?.inventoryId?.quantityAvailable || 0) === 0
                   )}
                 >
                   {!user ? "Sign In to Checkout" : "Proceed to Checkout"}

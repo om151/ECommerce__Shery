@@ -15,7 +15,7 @@ import Button from "./Button.jsx";
 const Header = () => {
   // Get auth, cart, and wishlist state from Redux
   const { user, isAuthenticated, isAdmin, logoutUser } = useAuth();
-  const { itemCount } = useCart();
+  const { uniqueItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
 
   // Navigation and routing
@@ -174,9 +174,9 @@ const Header = () => {
                     />
                   </svg>
                   {/* Cart Item Count Badge */}
-                  {itemCount > 0 && (
+                  {uniqueItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {itemCount > 99 ? "99+" : itemCount}
+                      {uniqueItemCount > 99 ? "99+" : uniqueItemCount}
                     </span>
                   )}
                 </Link>
@@ -340,9 +340,9 @@ const Header = () => {
                     className="flex items-center px-3 py-2 text-base font-medium text-gray-700"
                   >
                     Cart
-                    {itemCount > 0 && (
+                    {uniqueItemCount > 0 && (
                       <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {itemCount}
+                        {uniqueItemCount}
                       </span>
                     )}
                   </Link>

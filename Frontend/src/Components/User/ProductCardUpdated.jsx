@@ -4,10 +4,12 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../../Components/Common/Button.jsx";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useToast } from "../../store/Hooks/Common/hook.useToast.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 import { useWishlist } from "../../store/Hooks/User/hook.useWishlist.js";
+import Button from "../Common/Button.jsx";
+import Toast from "../Common/Toast.jsx";
 
 /**
  * ProductCard component for displaying product information
@@ -38,6 +40,7 @@ const ProductCard = ({
     items: wishlistItems,
   } = useWishlist();
   const { user, isAuthenticated } = useAuth();
+  const { toast, showSuccess, showError, hideToast } = useToast();
 
   // Local state for wishlist loading
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -82,13 +85,19 @@ const ProductCard = ({
   const handleAddToCart = async () => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      alert("Please log in to add items to cart");
+      showError("Please log in to add items to cart");
       return;
     }
 
     // Check if product has variants
     if (!defaultVariant) {
-      alert("Product variant not available");
+      showError("Product variant not available");
+      return;
+    }
+
+    // Check if product is in stock
+    if (!inStock) {
+      showError("Product is currently out of stock");
       return;
     }
 
@@ -99,9 +108,11 @@ const ProductCard = ({
         variantId: defaultVariant._id,
         quantity: 1,
       });
+
+      showSuccess(`${product.title} added to cart!`);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add item to cart. Please try again.");
+      showError("Failed to add item to cart. Please try again.");
     }
   };
 
@@ -123,12 +134,14 @@ const ProductCard = ({
     try {
       if (isInWishlist) {
         await removeFromWishlist(product._id);
+        showSuccess("Removed from wishlist");
       } else {
         await addToWishlist({ productId: product._id });
+        showSuccess("Added to wishlist");
       }
     } catch (error) {
       console.error("Error toggling wishlist:", error);
-      alert(
+      showError(
         isInWishlist
           ? "Failed to remove from wishlist"
           : "Failed to add to wishlist"
@@ -273,11 +286,11 @@ const ProductCard = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               <span className="text-lg font-bold text-gray-900">
-                ${defaultVariant?.price?.toLocaleString() || "0"}
+                ₹{defaultVariant?.price?.toLocaleString() || "0"}
               </span>
               {hasDiscount && (
                 <span className="text-sm text-gray-500 line-through">
-                  ${defaultVariant.compareAtPrice?.toLocaleString()}
+                  ₹{defaultVariant.compareAtPrice?.toLocaleString()}
                 </span>
               )}
             </div>
@@ -405,11 +418,11 @@ const ProductCard = ({
               {/* Price */}
               <div className="flex items-center space-x-2 mb-3">
                 <span className="text-xl font-bold text-gray-900">
-                  ${defaultVariant?.price?.toLocaleString() || "0"}
+                  ₹{defaultVariant?.price?.toLocaleString() || "0"}
                 </span>
                 {hasDiscount && (
                   <span className="text-sm text-gray-500 line-through">
-                    ${defaultVariant.compareAtPrice?.toLocaleString()}
+                    ₹{defaultVariant.compareAtPrice?.toLocaleString()}
                   </span>
                 )}
               </div>
@@ -457,6 +470,7 @@ const ProductCard = ({
           </div>
         </div>
       </div>
+      <Toast />
     </div>
   );
 };

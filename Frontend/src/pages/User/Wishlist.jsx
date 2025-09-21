@@ -5,7 +5,9 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
 import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
+import Toast from "../../Components/Common/Toast.jsx";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useToast } from "../../store/Hooks/Common/hook.useToast.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 import { useWishlist } from "../../store/Hooks/User/hook.useWishlist.js";
 
@@ -17,6 +19,7 @@ const Wishlist = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { showSuccess, showError } = useToast();
   const {
     items,
     itemCount,
@@ -46,7 +49,7 @@ const Wishlist = () => {
   // Handle add to cart
   const handleAddToCart = async (product) => {
     if (!product.variants || product.variants.length === 0) {
-      alert("Product is not available");
+      showError("Product is not available");
       return;
     }
 
@@ -56,10 +59,10 @@ const Wishlist = () => {
         variantId: product.variants[0]._id,
         quantity: 1,
       });
-      alert(`${product.title} added to cart!`);
+      showSuccess(`${product.title} added to cart!`);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add product to cart");
+      showError("Failed to add product to cart");
     }
   };
 
@@ -377,6 +380,7 @@ const Wishlist = () => {
           </div>
         )}
       </div>
+      <Toast />
     </div>
   );
 };

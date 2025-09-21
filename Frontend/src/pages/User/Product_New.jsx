@@ -464,12 +464,12 @@ const Product = () => {
               <div className="mb-6">
                 <div className="flex items-baseline space-x-2">
                   <span className="text-4xl font-bold text-gray-900">
-                    ${selectedVariant?.price || 0}
+                    ₹{selectedVariant?.price || 0}
                   </span>
                   {selectedVariant?.compareAtPrice &&
                     selectedVariant.compareAtPrice > selectedVariant.price && (
                       <span className="text-lg text-gray-500 line-through">
-                        ${selectedVariant.compareAtPrice}
+                        ₹{selectedVariant.compareAtPrice}
                       </span>
                     )}
                 </div>
@@ -515,7 +515,7 @@ const Product = () => {
                           </div>
                           <div className="text-right">
                             <div className="font-bold text-gray-900">
-                              ${variant.price}
+                              ₹{variant.price}
                             </div>
                             <div
                               className={`text-sm ${

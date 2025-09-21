@@ -344,7 +344,7 @@ const Products = () => {
                       </Button>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
-                      Range: ${availableFilters.priceRange.min} - $
+                      Range: ₹{availableFilters.priceRange.min} - ₹
                       {availableFilters.priceRange.max}
                     </div>
                   </div>

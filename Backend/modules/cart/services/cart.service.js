@@ -38,7 +38,6 @@ async function addToCart(userId, productId, variantId, quantity) {
   if (!product) throw new Error("Product not found");
   if (!variant) throw new Error("Variant not found");
 
-
   // Ensure the variant belongs to the product
   if (
     variant.productId &&
@@ -78,7 +77,14 @@ async function addToCart(userId, productId, variantId, quantity) {
         path: "items",
         populate: [
           { path: "productId", model: "Product" },
-          { path: "variantId", model: "ProductVariant" },
+          {
+            path: "variantId",
+            model: "ProductVariant",
+            populate: {
+              path: "inventoryId",
+              model: "Inventory",
+            },
+          },
         ],
       });
     } else {
@@ -114,7 +120,14 @@ async function addToCart(userId, productId, variantId, quantity) {
     path: "items",
     populate: [
       { path: "productId", model: "Product" },
-      { path: "variantId", model: "ProductVariant" },
+      {
+        path: "variantId",
+        model: "ProductVariant",
+        populate: {
+          path: "inventoryId",
+          model: "Inventory",
+        },
+      },
     ],
   });
 }
@@ -160,7 +173,14 @@ async function editCart(userId, productId, variantId, quantity) {
     path: "items",
     populate: [
       { path: "productId", model: "Product" },
-      { path: "variantId", model: "ProductVariant" },
+      {
+        path: "variantId",
+        model: "ProductVariant",
+        populate: {
+          path: "inventoryId",
+          model: "Inventory",
+        },
+      },
     ],
   });
 }
@@ -204,7 +224,14 @@ async function removeFromCart(userId, productId, variantId) {
     path: "items",
     populate: [
       { path: "productId", model: "Product" },
-      { path: "variantId", model: "ProductVariant" },
+      {
+        path: "variantId",
+        model: "ProductVariant",
+        populate: {
+          path: "inventoryId",
+          model: "Inventory",
+        },
+      },
     ],
   });
 }
@@ -217,7 +244,14 @@ async function getCart(userId) {
     path: "items",
     populate: [
       { path: "productId", model: "Product" },
-      { path: "variantId", model: "ProductVariant" },
+      {
+        path: "variantId",
+        model: "ProductVariant",
+        populate: {
+          path: "inventoryId",
+          model: "Inventory",
+        },
+      },
     ],
   });
 
@@ -240,9 +274,42 @@ async function getCart(userId) {
   };
 }
 
+/**
+ * CLEAR CART
+ */
+async function clearCart(userId) {
+  const cart = await Cart.findOne({ userId });
+
+  if (!cart) {
+    // Return empty cart if no cart exists
+    return { items: [], total: 0, currency: "INR" };
+  }
+
+  // Delete all cart items
+  if (cart.items && cart.items.length > 0) {
+    await CartItem.deleteMany({ _id: { $in: cart.items } });
+  }
+
+  // Update cart to be empty
+  cart.items = [];
+  cart.total = 0;
+  await cart.save();
+
+  return {
+    _id: cart._id,
+    userId: cart.userId,
+    items: [],
+    total: 0,
+    currency: cart.currency || "INR",
+    updatedAt: cart.updatedAt,
+    createdAt: cart.createdAt,
+  };
+}
+
 module.exports = {
   addToCart,
   editCart,
   removeFromCart,
   getCart,
+  clearCart,
 };

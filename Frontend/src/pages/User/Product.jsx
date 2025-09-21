@@ -5,9 +5,11 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
 import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
+import Toast from "../../Components/Common/Toast.jsx";
 import { getProductById } from "../../shared/api/User/getProduct.apiService.js";
 import { getProductReviews } from "../../shared/api/User/review.apiService.js";
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
+import { useToast } from "../../store/Hooks/Common/hook.useToast.js";
 import { useCart } from "../../store/Hooks/User/hook.useCart.js";
 import { useWishlist } from "../../store/Hooks/User/hook.useWishlist.js";
 
@@ -25,6 +27,7 @@ const Product = () => {
     items: wishlistItems,
   } = useWishlist();
   const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   // Product data state
   const [product, setProduct] = useState(null);
@@ -119,11 +122,11 @@ const Product = () => {
         quantity,
       });
 
-      // Show success message (you can customize this)
-      alert(`${product.title} added to cart!`);
+      // Show success message
+      showSuccess(`${product.title} added to cart!`);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add product to cart");
+      showError("Failed to add product to cart");
     } finally {
       setAddingToCart(false);
     }
@@ -147,7 +150,7 @@ const Product = () => {
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Failed to add product to cart");
+      showError("Failed to add product to cart");
       return;
     }
 
@@ -518,12 +521,12 @@ const Product = () => {
               <div className="mb-6">
                 <div className="flex items-baseline space-x-2">
                   <span className="text-4xl font-bold text-gray-900">
-                    ${selectedVariant?.price || 0}
+                    ₹{selectedVariant?.price || 0}
                   </span>
                   {selectedVariant?.compareAtPrice &&
                     selectedVariant.compareAtPrice > selectedVariant.price && (
                       <span className="text-lg text-gray-500 line-through">
-                        ${selectedVariant.compareAtPrice}
+                        ₹{selectedVariant.compareAtPrice}
                       </span>
                     )}
                 </div>
@@ -569,7 +572,7 @@ const Product = () => {
                           </div>
                           <div className="text-right">
                             <div className="font-bold text-gray-900">
-                              ${variant.price}
+                              ₹{variant.price}
                             </div>
                             <div
                               className={`text-sm ${
@@ -938,6 +941,7 @@ const Product = () => {
           </div>
         </div>
       </div>
+      <Toast />
     </div>
   );
 };

@@ -9,15 +9,28 @@ const {
 const authMiddleware = require("../../../middleware/auth.middleware");
 
 // Add product to cart
-router.post("/add", authMiddleware, validateAddToCart, cartController.addToCart);
+router.post(
+  "/add",
+  authMiddleware,
+  validateAddToCart,
+  cartController.addToCart
+);
 
 // Edit product quantity in cart
-router.put("/edit",authMiddleware, validateEditCart, cartController.editCart);
+router.put("/edit", authMiddleware, validateEditCart, cartController.editCart);
 
 // Remove product from cart
-router.post("/remove", authMiddleware, validateRemoveFromCart, cartController.removeFromCart);
+router.post(
+  "/remove",
+  authMiddleware,
+  validateRemoveFromCart,
+  cartController.removeFromCart
+);
 
 // Get cart for user
 router.get("/", authMiddleware, cartController.getCart);
+
+// Clear entire cart
+router.delete("/clear", authMiddleware, cartController.clearCart);
 
 module.exports = router;

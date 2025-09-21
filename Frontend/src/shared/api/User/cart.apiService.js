@@ -1,6 +1,5 @@
 import httpClient from "../http.js";
 
-
 export const getCart = async () => {
   try {
     const response = await httpClient.get("/cart");
@@ -9,7 +8,6 @@ export const getCart = async () => {
     throw error;
   }
 };
-
 
 export const addToCart = async (cartItem) => {
   try {
@@ -20,20 +18,27 @@ export const addToCart = async (cartItem) => {
   }
 };
 
-
 export const updateCartItem = async (updateData) => {
   try {
-    const response = await httpClient.put("/cart/update", updateData);
+    const response = await httpClient.put("/cart/edit", updateData);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-
 export const removeFromCart = async (removeData) => {
   try {
     const response = await httpClient.post("/cart/remove", removeData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const clearCart = async () => {
+  try {
+    const response = await httpClient.delete("/cart/clear");
     return response.data;
   } catch (error) {
     throw error;

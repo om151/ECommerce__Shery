@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -15,6 +14,7 @@ import {
 
 import {
   addToCart as apiAddToCart,
+  clearCart as apiClearCart,
   getCart as apiGetCart,
   removeFromCart as apiRemoveFromCart,
   updateCartItem as apiUpdateCartItem,
@@ -22,7 +22,6 @@ import {
 
 export const useAppDispatch = () => useDispatch();
 export const useAppSelector = useSelector;
-
 
 export const useCart = () => {
   const dispatch = useAppDispatch();
@@ -62,13 +61,17 @@ export const useCart = () => {
         // API expects { productId, variantId?, quantity }
         const response = await apiAddToCart(itemData);
 
-        // Add item to local state immediately for better UX
-        dispatch(
-          addCartItem({
+        // Instead of adding to local state, sync with the server response
+        if (response.cart && response.cart.items) {
+          dispatch(syncCart(response.cart));
+        } else {
+          // Fallback: add to local state
+          const cartItemData = {
             ...itemData,
-            product: response.cartItem?.product || { _id: itemData.productId },
-          })
-        );
+            product: { _id: itemData.productId },
+          };
+          dispatch(addCartItem(cartItemData));
+        }
 
         return { type: "cart/addToCart/fulfilled", payload: response };
       } catch (error) {
@@ -87,8 +90,13 @@ export const useCart = () => {
         // API expects { productId, variantId?, quantity }
         const response = await apiUpdateCartItem(itemData);
 
-        // Update local state immediately
-        dispatch(updateCartItemQuantity(itemData));
+        // Sync with server response instead of updating local state
+        if (response.cart && response.cart.items) {
+          dispatch(syncCart(response.cart));
+        } else {
+          // Fallback: update local state
+          dispatch(updateCartItemQuantity(itemData));
+        }
 
         return { type: "cart/updateQuantity/fulfilled", payload: response };
       } catch (error) {
@@ -116,8 +124,13 @@ export const useCart = () => {
         // API expects { productId, variantId? }
         const response = await apiRemoveFromCart(itemData);
 
-        // Remove from local state immediately
-        dispatch(removeCartItem(itemData));
+        // Sync with server response instead of updating local state
+        if (response.cart && response.cart.items) {
+          dispatch(syncCart(response.cart));
+        } else {
+          // Fallback: remove from local state
+          dispatch(removeCartItem(itemData));
+        }
 
         return { type: "cart/removeFromCart/fulfilled", payload: response };
       } catch (error) {
@@ -143,12 +156,17 @@ export const useCart = () => {
       dispatch(setCartLoading(true));
       dispatch(clearCartError());
       try {
-        // Clear cart locally immediately
-        dispatch(clearCart());
+        const response = await apiClearCart();
 
-        // Note: You might want to add a clearCart API endpoint
-        // For now, we could remove all items individually or handle this differently
-        return { type: "cart/clearCart/fulfilled" };
+        // Sync with server response
+        if (response.cart) {
+          dispatch(syncCart(response.cart));
+        } else {
+          // Fallback: clear local cart
+          dispatch(clearCart());
+        }
+
+        return { type: "cart/clearCart/fulfilled", payload: response };
       } catch (error) {
         const errorMessage =
           error.response?.data?.message ||

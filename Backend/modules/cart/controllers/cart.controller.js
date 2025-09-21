@@ -37,3 +37,9 @@ exports.getCart = asyncHandler(async (req, res, next) => {
   const cart = await cartService.getCart(userId);
   res.status(200).json({ cart });
 });
+
+exports.clearCart = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  const cart = await cartService.clearCart(userId);
+  res.status(200).json({ message: "Cart cleared successfully", cart });
+});
