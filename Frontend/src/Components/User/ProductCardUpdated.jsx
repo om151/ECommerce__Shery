@@ -155,7 +155,7 @@ const ProductCard = ({
   if (viewMode === "grid") {
     return (
       <div
-        className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden h-full flex flex-col ${className}`}
+        className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden h-full  flex flex-col ${className}`}
         {...props}
       >
         {/* Product Image */}
@@ -315,12 +315,12 @@ const ProductCard = ({
   // List view layout
   return (
     <div
-      className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden p-4 ${className}`}
+      className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden p-4 w-full max-w-full ${className}`}
       {...props}
     >
-      <div className="flex gap-4">
+      <div className="flex gap-4 w-full overflow-hidden">
         {/* Product Image */}
-        <div className="relative w-32 h-32 flex-shrink-0 overflow-hidden rounded-lg">
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden rounded-lg">
           <Link to={`/product/${product._id}`}>
             {firstImage ? (
               <img
@@ -362,30 +362,30 @@ const ProductCard = ({
         </div>
 
         {/* Product Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-1 min-w-0 overflow-hidden">
               {/* Product Title */}
               <Link to={`/product/${product._id}`} className="block">
-                <h3 className="font-semibold text-lg text-gray-900 hover:text-indigo-600 transition-colors duration-200 mb-2 truncate">
+                <h3 className="font-semibold text-base sm:text-lg text-gray-900 hover:text-indigo-600 transition-colors duration-200 mb-2 line-clamp-1 sm:line-clamp-2">
                   {product.title}
                 </h3>
               </Link>
 
               {/* Product Description */}
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2 overflow-hidden">
                 {product.description}
               </p>
 
               {/* Categories and Rating */}
-              <div className="flex items-center gap-4 mb-3">
+              <div className="flex items-center gap-4 mb-3 overflow-hidden">
                 {/* Categories */}
                 {product.categories?.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1 overflow-hidden">
                     {product.categories.slice(0, 2).map((category, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                        className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded whitespace-nowrap"
                       >
                         {category}
                       </span>
@@ -394,7 +394,7 @@ const ProductCard = ({
                 )}
 
                 {/* Rating */}
-                <div className="flex items-center">
+                <div className="flex items-center flex-shrink-0">
                   {[...Array(5)].map((_, i) => (
                     <svg
                       key={i}
@@ -409,19 +409,19 @@ const ProductCard = ({
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
-                  <span className="text-sm text-gray-600 ml-2">
+                  <span className="text-sm text-gray-600 ml-2 whitespace-nowrap">
                     ({product.rating?.toFixed(1) || "0.0"})
                   </span>
                 </div>
               </div>
 
               {/* Price */}
-              <div className="flex items-center space-x-2 mb-3">
-                <span className="text-xl font-bold text-gray-900">
+              <div className="flex items-center space-x-2 mb-3 overflow-hidden">
+                <span className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">
                   ₹{defaultVariant?.price?.toLocaleString() || "0"}
                 </span>
                 {hasDiscount && (
-                  <span className="text-sm text-gray-500 line-through">
+                  <span className="text-sm text-gray-500 line-through whitespace-nowrap">
                     ₹{defaultVariant.compareAtPrice?.toLocaleString()}
                   </span>
                 )}
@@ -429,7 +429,7 @@ const ProductCard = ({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-2 ml-4">
+            <div className="flex flex-col gap-2 flex-shrink-0">
               <button
                 onClick={handleWishlistToggle}
                 disabled={wishlistLoading}
@@ -462,7 +462,7 @@ const ProductCard = ({
                 onClick={handleAddToCart}
                 loading={cartLoading}
                 disabled={!inStock}
-                className="min-w-28"
+                className="whitespace-nowrap min-w-[100px]"
               >
                 {inStock ? "Add to Cart" : "Out of Stock"}
               </Button>

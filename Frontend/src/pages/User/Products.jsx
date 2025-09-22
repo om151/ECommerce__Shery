@@ -235,7 +235,7 @@ const Products = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-8xl mx-6 px-4 sm:px-6 lg:px-32 py-8">
         <div className="flex gap-8">
           {/* Filters Sidebar */}
           <div
@@ -243,7 +243,7 @@ const Products = () => {
               showFilters ? "block" : "hidden"
             } lg:block w-80 flex-shrink-0`}
           >
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
+            <div className="bg-white rounded-lg shadow-sm px-6 sticky top-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
                 <Button
