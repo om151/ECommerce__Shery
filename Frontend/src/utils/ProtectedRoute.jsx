@@ -3,8 +3,8 @@
 
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import LoadingSpinner from "../Components/Common/LoadingSpinner"
-import { useAuth } from "../store/Hooks/Common/hook.useAuth";
+import LoadingSpinner from "../Components/Common/LoadingSpinner.jsx";
+import { useAuth } from "../store/Hooks/Common/hook.useAuth.js";
 
 /**
  * ProtectedRoute component that requires authentication

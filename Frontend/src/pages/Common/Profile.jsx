@@ -1,7 +1,7 @@
 // Profile Page - User profile management and order history
 // This page allows users to view and edit their profile information
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
 import Input from "../../Components/Common/Input.jsx";
@@ -14,7 +14,11 @@ import { useOrders } from "../../store/Hooks/User/hook.useOrder.js";
 
 /**
  * Profile page component
- * @returns {React.Component} Profile page component
+ * @returns {                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>t.Component} Profile page component
  */
 const Profile = () => {
   const { user, isLoading, updateUserProfile, isAdmin } = useAuth();
@@ -462,7 +466,7 @@ const Profile = () => {
           </div>
 
           {/* Main Content */}
-          <div className=" h-screen lg:col-span-9 mt-8 lg:mt-0">
+          <div className="lg:col-span-9 mt-8 lg:mt-0">
             <div className="bg-white shadow rounded-lg">
               {/* Profile Information Tab */}
               {activeTab === "profile" && (
@@ -621,8 +625,8 @@ const Profile = () => {
 
               {/* Order History Tab */}
               {activeTab === "orders" && !isAdmin && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                <div className="p-6 min-h-screen">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-6 animate-fade-in">
                     Order History
                   </h2>
 
@@ -631,9 +635,9 @@ const Profile = () => {
                       <LoadingSpinner size="lg" />
                     </div>
                   ) : orders.length === 0 ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 animate-fade-in">
                       <svg
-                        className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                        className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-bounce-slow"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -656,84 +660,293 @@ const Profile = () => {
                       </Link>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      {orders.map((order) => (
-                        <div
-                          key={order._id}
-                          className="border border-gray-200 rounded-lg p-6"
-                        >
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <h3 className="text-lg font-medium text-gray-900">
-                                Order #{order._id.slice(-8)}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                Placed on{" "}
-                                {new Date(order.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                                order.status
-                              )}`}
-                            >
-                              {order.status.charAt(0).toUpperCase() +
-                                order.status.slice(1)}
-                            </span>
-                          </div>
-
-                          {/* Order Items */}
-                          <div className="space-y-3 mb-4">
-                            {order.items?.map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center space-x-4"
-                              >
-                                <img
-                                  src={
-                                    item.product?.image ||
-                                    "/api/placeholder/50/50"
-                                  }
-                                  alt={item.product?.name || "Product"}
-                                  className="w-12 h-12 object-cover rounded-md"
-                                />
-                                <div className="flex-1">
-                                  <h4 className="text-sm font-medium text-gray-900">
-                                    {item.product?.name || "Product"}
-                                  </h4>
-                                  <p className="text-sm text-gray-600">
-                                    Qty: {item.quantity}
-                                  </p>
-                                </div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  $
-                                  {((item.price || 0) * item.quantity).toFixed(
-                                    2
+                    <div className="space-y-6 max-h-[87vh] overflow-y-auto scrollbar-hide">
+                      {console.log("🛒 PROFILE DEBUG - Orders data:", orders)}
+                      {orders.map((order, index) => {
+                        console.log(
+                          "🛒 PROFILE DEBUG - Processing order:",
+                          order
+                        );
+                        console.log(
+                          "🛒 PROFILE DEBUG - Order items:",
+                          order.items
+                        );
+                        return (
+                          <div
+                            key={order._id}
+                            className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 animate-slide-in hover:border-primary-300 transform hover:-translate-y-1"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                              <div className="space-y-1">
+                                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                  <svg
+                                    className="w-4 h-4 text-primary-600 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                    />
+                                  </svg>
+                                  Order #{order._id.slice(-8)}
+                                </h3>
+                                <p className="text-sm text-gray-500 flex items-center">
+                                  <svg
+                                    className="w-4 h-4 text-gray-400 mr-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4M3 7h18l-2 13H5L3 7z"
+                                    />
+                                  </svg>
+                                  Placed on{" "}
+                                  {new Date(order.createdAt).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    }
                                   )}
                                 </p>
                               </div>
-                            ))}
-                          </div>
+                              <div className="flex items-center space-x-3">
+                                <span
+                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm transition-colors duration-200 ${getStatusBadgeClass(
+                                    order.status
+                                  )}`}
+                                >
+                                  {order.status === "delivered" && (
+                                    <svg
+                                      className="w-3 h-3 mr-1"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  )}
+                                  {order.status === "processing" && (
+                                    <svg
+                                      className="w-3 h-3 mr-1 animate-spin"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                      />
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {order.status === "shipped" && (
+                                    <svg
+                                      className="w-3 h-3 mr-1"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M8 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {order.status.charAt(0).toUpperCase() +
+                                    order.status.slice(1)}
+                                </span>
+                              </div>
+                            </div>
 
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                            <p className="text-lg font-semibold text-gray-900">
-                              Total: ${order.total?.toFixed(2) || "0.00"}
-                            </p>
-                            <div className="space-x-3">
-                              <Link to={`/order/${order._id}`}>
-                                <Button variant="outline" size="sm">
-                                  View Details
-                                </Button>
-                              </Link>
-                              {order.status === "delivered" && (
-                                <Button variant="primary" size="sm">
-                                  Reorder
-                                </Button>
-                              )}
+                            {/* Order Items */}
+                            <div className="space-y-3 mb-4">
+                              {order.items?.map((item, index) => {
+                                // Handle OrderItem data structure with populated product and variant data
+                                const title =
+                                  item.title ||
+                                  item.productId?.title ||
+                                  "Product";
+                                const quantity = item.quantity || 0;
+                                const unitPrice =
+                                  item.unitPrice || item.price || 0;
+                                const subtotal =
+                                  item.subtotal || unitPrice * quantity;
+                                const variantName =
+                                  item.variantName || item.variantId?.name;
+
+                                // Handle product image with multiple fallbacks
+                                const getProductImage = () => {
+                                  // Try multiple image sources with the new data structure
+                                  const imageSources = [
+                                    // Try variant images first (most specific)
+                                    item.variantId?.images?.[0],
+                                    item.variant?.images?.[0],
+
+                                    // Try product images
+                                    item.productId?.images?.[0],
+                                    item.product?.images?.[0],
+                                    item.productId?.image,
+                                    item.product?.image,
+
+                                    // Fallback to legacy image fields
+                                    item.image,
+                                    item.productImage,
+                                  ];
+
+                                  for (const src of imageSources) {
+                                    if (
+                                      src &&
+                                      typeof src === "string" &&
+                                      src.trim() !== ""
+                                    ) {
+                                      return src;
+                                    }
+                                  }
+
+                                  // Fallback to a placeholder image
+                                  return "https://via.placeholder.com/50x50/f3f4f6/9ca3af?text=No+Image";
+                                };
+
+                                return (
+                                  <div
+                                    key={item._id || index}
+                                    className="flex items-center space-x-4 group hover:bg-gray-50 p-2 rounded-md transition-colors duration-200"
+                                  >
+                                    <div className="relative">
+                                      <img
+                                        src={getProductImage()}
+                                        alt={title}
+                                        className="w-12 h-12 object-cover rounded-md border border-gray-200 group-hover:shadow-md transition-shadow duration-200"
+                                        onError={(e) => {
+                                          // Fallback to placeholder if image fails to load
+                                          e.target.src =
+                                            "https://via.placeholder.com/50x50/f3f4f6/9ca3af?text=No+Image";
+                                        }}
+                                      />
+                                      {quantity > 1 && (
+                                        <div className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+                                          {quantity}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1">
+                                      <h4 className="text-sm font-medium text-gray-900 group-hover:text-primary-700 transition-colors duration-200">
+                                        {title}
+                                      </h4>
+                                      {variantName && (
+                                        <p className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded-md inline-block">
+                                          {variantName}
+                                        </p>
+                                      )}
+                                      <p className="text-sm text-gray-600 mt-1">
+                                        Qty:{" "}
+                                        <span className="font-medium">
+                                          {quantity}
+                                        </span>{" "}
+                                        × ₹{unitPrice.toFixed(2)}
+                                      </p>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-900">
+                                      ₹{subtotal.toFixed(2)}
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div className="flex items-center justify-between pt-4 border-t border-gray-200 bg-gray-50 -mx-6 px-6 py-4 rounded-b-lg">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-500">
+                                  Total:
+                                </span>
+                                <p className="text-xl font-bold text-primary-700">
+                                  ₹
+                                  {(
+                                    order.grandTotal ||
+                                    order.total ||
+                                    0
+                                  ).toFixed(2)}
+                                </p>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                <Link to={`/order-confirmation/${order._id}`}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors duration-200"
+                                  >
+                                    <svg
+                                      className="w-4 h-4 mr-1"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                      />
+                                    </svg>
+                                    View Details
+                                  </Button>
+                                </Link>
+                                {order.status === "delivered" && (
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    className="hover:bg-primary-700 transition-colors duration-200"
+                                  >
+                                    <svg
+                                      className="w-4 h-4 mr-1"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                      />
+                                    </svg>
+                                    Reorder
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

@@ -8,6 +8,7 @@ const {
   cancelOrderController,
   listOrdersController,
   listAllOrdersController,
+  getOrderController,
 } = require("../controllers/order.controller");
 const {
   validateCreateOrder,
@@ -36,6 +37,14 @@ router.put(
 
 // List orders for authenticated user
 router.get("/", authMiddleware, listOrdersController);
+
+// Get single order by ID for authenticated user
+router.get(
+  "/:orderId",
+  authMiddleware,
+  validateOrderIdParam,
+  getOrderController
+);
 
 // Admin: list all orders (paginated)
 router.get(

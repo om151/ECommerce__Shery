@@ -260,17 +260,13 @@ async function createOrderForUser(userId, payload) {
       // { session }
     );
 
-   
-
     if (appliedCouponId) {
+      Coupon.findByIdAndUpdate(
+        appliedCouponId,
+        { $inc: { usageCount: 1 } }
+        // { session }
+      ).exec();
 
-       Coupon.findByIdAndUpdate(
-      appliedCouponId,
-      { $inc: { usageCount: 1 } }
-      // { session }
-    ).exec();
-
-    
       CouponUsage.create(
         [
           {
@@ -385,7 +381,19 @@ async function listUserOrders(userId, { page = 1, limit = 10 } = {}) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("items")
+      .populate({
+        path: "items",
+        populate: [
+          {
+            path: "productId",
+            select: "title description categories attributes rating", // Include product fields
+          },
+          {
+            path: "variantId",
+            select: "name attributes price images", // Include variant images
+          },
+        ],
+      })
       .lean(),
     Order.countDocuments({ userId }),
   ]);
@@ -404,7 +412,19 @@ async function listAllOrders({ page = 1, limit = 10 } = {}) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("items")
+      .populate({
+        path: "items",
+        populate: [
+          {
+            path: "productId",
+            select: "title description categories attributes rating", // Include product fields
+          },
+          {
+            path: "variantId",
+            select: "name attributes price images", // Include variant images
+          },
+        ],
+      })
       .populate("userId", "name email")
       .lean(),
     Order.countDocuments({}),
@@ -413,20 +433,56 @@ async function listAllOrders({ page = 1, limit = 10 } = {}) {
   return { orders, page, limit, total, pages: Math.ceil(total / limit) };
 }
 
-
 async function listAllOrdersTotalOrders() {
-
-
   const [orders, total] = await Promise.all([
     Order.find({})
       .sort({ createdAt: -1 })
-      .populate("items")
+      .populate({
+        path: "items",
+        populate: [
+          {
+            path: "productId",
+            select: "title description categories attributes rating", // Include product fields
+          },
+          {
+            path: "variantId",
+            select: "name attributes price images", // Include variant images
+          },
+        ],
+      })
       .populate("userId", "name email")
       .lean(),
     Order.countDocuments({}),
   ]);
 
   return { orders, total };
+}
+
+async function getOrderById(userId, orderId) {
+  const order = await Order.findOne({ _id: orderId, userId })
+    .populate({
+      path: "items",
+      populate: [
+        {
+          path: "productId",
+          select: "title description categories attributes rating", // Include product fields
+        },
+        {
+          path: "variantId",
+          select: "name attributes price images", // Include variant images
+        },
+      ],
+    })
+    .populate("shippingAddress")
+    .populate("billingAddress")
+    .populate("couponId")
+    .lean();
+
+  if (!order) {
+    throw new CustomError("Order not found", 404, "OrderNotFound");
+  }
+
+  return order;
 }
 
 module.exports = {
@@ -436,4 +492,5 @@ module.exports = {
   cancelOrder,
   listUserOrders,
   listAllOrders,
+  getOrderById,
 };

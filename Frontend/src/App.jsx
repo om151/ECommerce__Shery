@@ -23,6 +23,7 @@ import ResetPassword from "./pages/Common/ResetPassword.jsx";
 import Cart from "./pages/User/Cart.jsx";
 import Checkout from "./pages/User/Checkout.jsx";
 import Home from "./pages/User/Home.jsx";
+import OrderConfirmation from "./pages/User/OrderConfirmation.jsx";
 import Product from "./pages/User/Product.jsx";
 import Products from "./pages/User/Products.jsx";
 import Wishlist from "./pages/User/Wishlist.jsx";
@@ -95,6 +96,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-confirmation/:orderId"
+              element={
+                <ProtectedRoute>
+                  <OrderConfirmation />
                 </ProtectedRoute>
               }
             />

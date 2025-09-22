@@ -7,6 +7,7 @@ const {
   listUserOrders,
   listAllOrders,
   listAllOrdersTotalOrders,
+  getOrderById,
 } = require("../services/order.service");
 
 const createOrder = asyncHandler(async (req, res) => {
@@ -64,12 +65,25 @@ module.exports.listOrdersController = listOrdersController;
 
 const listAllOrdersController = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
-  if(!page || !limit){
-   const totalOrders = await listAllOrdersTotalOrders();
-   return res.status(200).json({totalOrders});
+  if (!page || !limit) {
+    const totalOrders = await listAllOrdersTotalOrders();
+    return res.status(200).json({ totalOrders });
   }
   const result = await listAllOrders({ page, limit });
   return res.status(200).json(result);
 });
+
+const getOrderController = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { orderId } = req.params;
+  const userId = req.user._id;
+  const order = await getOrderById(userId, orderId);
+  return res.status(200).json({ order });
+});
+
+module.exports.getOrderController = getOrderController;
 
 module.exports.listAllOrdersController = listAllOrdersController;

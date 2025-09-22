@@ -2,15 +2,15 @@
 // This page provides administrative functionality for managing the e-commerce platform
 
 import React, { useEffect, useRef, useState } from "react";
-import AdminSidebar from "../../components/admin/AdminSidebar.jsx";
-import AnalyticsTab from "../../components/admin/AnalyticsTab.jsx";
+import AdminSidebar from "../../Components/Admin/AdminSidebar.jsx";
+import AnalyticsTab from "../../Components/Admin/AnalyticsTab.jsx";
 import CouponsTab from "../../Components/Admin/Coupon/CouponsTab.jsx";
-import OrdersTab from "../../components/admin/OrdersTab.jsx";
-import OverviewTab from "../../components/admin/overviewTab.jsx";
+import OrdersTab from "../../Components/Admin/OrdersTab.jsx";
+import OverviewTab from "../../Components/Admin/overviewTab.jsx";
 import ProductsTab from "../../Components/Admin/Product/ProductsTab.jsx";
-import ReviewTab from "../../components/admin/ReviewTab.jsx";
-import SettingTab from "../../components/admin/SettingTab.jsx";
-import UsersTab from "../../components/admin/UsersTab.jsx";
+import ReviewTab from "../../Components/Admin/ReviewTab.jsx";
+import SettingTab from "../../Components/Admin/SettingTab.jsx";
+import UsersTab from "../../Components/Admin/UsersTab.jsx";
 import { useAdmin } from "../../store/Hooks/Admin/useAdmin.js"; //New
 import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 

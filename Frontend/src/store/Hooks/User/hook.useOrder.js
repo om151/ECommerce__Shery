@@ -1,6 +1,4 @@
-import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 
 import {
   addOrder,
@@ -21,7 +19,6 @@ import {
 export const useAppDispatch = () => useDispatch();
 export const useAppSelector = useSelector;
 
-
 export const useOrders = () => {
   const dispatch = useAppDispatch();
   const ordersState = useAppSelector((state) => state.user.orders);
@@ -40,10 +37,16 @@ export const useOrders = () => {
       dispatch(setOrdersLoading(true));
       dispatch(clearOrdersError());
       try {
-        const response = await apiGetUserOrders(page, limit);
-        dispatch(setOrders(response));
+        console.log("🔄 ORDERS - Fetching orders with params:", {
+          page,
+          limit,
+        });
+        const response = await apiGetUserOrders({ page, limit });
+        console.log("✅ ORDERS - API response:", response);
+        dispatch(setOrders(response.orders || response.data || []));
         return { type: "orders/fetchOrders/fulfilled", payload: response };
       } catch (error) {
+        console.error("❌ ORDERS - Error fetching orders:", error);
         const errorMessage =
           error.response?.data?.message ||
           error.message ||
@@ -74,11 +77,21 @@ export const useOrders = () => {
       dispatch(setOrdersLoading(true));
       dispatch(clearOrdersError());
       try {
+        console.log("🚀 ORDERS - Creating order with data:", orderData);
         const response = await apiCreateOrder(orderData);
-        dispatch(addOrder(response.order));
-        dispatch(setCurrentOrder(response.order));
+        console.log("✅ ORDERS - Order created, response:", response);
+
+        // Handle different response formats
+        const order = response.order || response.data;
+        if (order) {
+          dispatch(addOrder(order));
+          dispatch(setCurrentOrder(order));
+          console.log("✅ ORDERS - Order added to store:", order);
+        }
+
         return { type: "orders/createOrder/fulfilled", payload: response };
       } catch (error) {
+        console.error("❌ ORDERS - Error creating order:", error);
         const errorMessage =
           error.response?.data?.message ||
           error.message ||
