@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json({
     user,
     message: "Registration successful. Please verify your email.",
-    verificationLink, // For testing purposes only. Remove in production.
+    // verificationLink, // For testing purposes only. Remove in production.
   });
 });
 
@@ -84,7 +84,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   const { message, resetLink } = await handleForgotPassword(email);
 
-  res.status(200).json({ message, resetLink }); // For testing purposes only. Remove in production.
+  res.status(200).json({ message }); // For testing purposes only. Remove in production.
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
@@ -107,7 +107,7 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
   const { mail } = req.query;
 
   const { message, verificationLink } = await sendVerificationEmailFnc(mail);
-  res.status(200).json({ message, verificationLink });
+  res.status(200).json({ message });
 });
 
 // Update user details (name, phone)

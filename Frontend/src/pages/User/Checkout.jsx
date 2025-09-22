@@ -870,7 +870,7 @@ const Checkout = () => {
                   )}
 
                   {/* Popular Coupons Hint */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                  {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
                     <div className="text-xs text-blue-700 mb-2">
                       <span className="font-medium">
                         💡 Test Coupons (Development):
@@ -906,7 +906,7 @@ const Checkout = () => {
                       If these don't work, you may need to create test coupons
                       in the admin panel first.
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 shadow-sm">
