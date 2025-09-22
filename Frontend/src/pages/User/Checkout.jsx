@@ -952,7 +952,7 @@ const Checkout = () => {
 
                   {/* Success Animation */}
                   <div className="mt-3 flex items-center space-x-2 text-green-600 text-sm">
-                    <div className="flex space-x-1">
+                    {/* <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
                       <div
                         className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
@@ -962,7 +962,7 @@ const Checkout = () => {
                         className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       ></div>
-                    </div>
+                    </div> */}
                     <span className="font-medium">
                       Coupon discount applied to your order!
                     </span>
@@ -979,7 +979,7 @@ const Checkout = () => {
               </div>
 
               {appliedCoupon && couponDiscount > 0 && (
-                <div className="flex justify-between items-center bg-green-50 -mx-6 px-6 py-2 border border-green-200 rounded-lg">
+                <div className="flex justify-between items-center bg-green-50 px-6 py-2 border border-green-200 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <span className="text-green-600 text-sm">🎟️</span>
                     <span className="text-green-700 font-medium">
@@ -997,7 +997,7 @@ const Checkout = () => {
                 </div>
               )}
 
-              <div className="flex justify-between items-center font-bold text-xl border-t pt-3 bg-gradient-to-r from-blue-50 to-indigo-50 -mx-6 px-6 py-3 rounded-lg border border-blue-200">
+              <div className="flex justify-between items-center font-bold text-xl border-t pt-3 bg-gradient-to-r from-blue-50 to-indigo-50 my-2 px-6 py-3 rounded-lg border border-blue-200">
                 <span className="text-gray-800">Total Amount</span>
                 <div className="text-right">
                   <span
@@ -1025,7 +1025,7 @@ const Checkout = () => {
             <button
               onClick={handleCheckout}
               disabled={loading || paymentLoading || !selectedAddress}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg disabled:transform-none disabled:shadow-none ${
+              className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg disabled:transform-none disabled:shadow-none my-2 ${
                 appliedCoupon
                   ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-green-200"
                   : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-200"
