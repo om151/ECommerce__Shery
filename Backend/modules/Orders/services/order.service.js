@@ -394,6 +394,10 @@ async function listUserOrders(userId, { page = 1, limit = 10 } = {}) {
           },
         ],
       })
+      .populate({
+        path: "payments",
+        select: "method provider status amountCaptured transactionId createdAt", // Include payment details
+      })
       .lean(),
     Order.countDocuments({ userId }),
   ]);
@@ -426,6 +430,10 @@ async function listAllOrders({ page = 1, limit = 10 } = {}) {
         ],
       })
       .populate("userId", "name email")
+      .populate({
+        path: "payments",
+        select: "method provider status amountCaptured transactionId createdAt", // Include payment details
+      })
       .lean(),
     Order.countDocuments({}),
   ]);
@@ -476,6 +484,10 @@ async function getOrderById(userId, orderId) {
     .populate("shippingAddress")
     .populate("billingAddress")
     .populate("couponId")
+    .populate({
+      path: "payments",
+      select: "method provider status amountCaptured transactionId createdAt", // Include payment details
+    })
     .lean();
 
   if (!order) {

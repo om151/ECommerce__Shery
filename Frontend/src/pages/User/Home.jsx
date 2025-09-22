@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../../Components/Common/Button.jsx";
 import LoadingSpinner from "../../Components/Common/LoadingSpinner.jsx";
-import ProductCard from "../../Components/User/ProductCard.jsx";
+import ProductCard from "../../Components/User//ProductCardUpdated.jsx";
 import { getProducts } from "../../shared/api/User/getProduct.apiService.js";
 
 /**
@@ -67,7 +67,7 @@ const Home = () => {
                 <Link to="/products">
                   <Button
                     size="lg"
-                    className="bg-white text-[#2563eb] hover:bg-gray-400"
+                    className="bg-white text-[#1c5be1] hover:bg-gray-400 hover:text-white"
                   >
                     Shop Now
                   </Button>
@@ -285,7 +285,7 @@ const Home = () => {
             <Button
               type="submit"
               size="lg"
-              className="bg-white text-primary-600 hover:bg-gray-100 px-8"
+              className="bg-white text-[#1c5be1] hover:bg-gray-400 hover:text-white px-8"
             >
               Subscribe
             </Button>

@@ -12,6 +12,63 @@ import { useAuth } from "../../store/Hooks/Common/hook.useAuth.js";
 import { useAddresses } from "../../store/Hooks/User/hook.useAddress.js";
 import { useOrders } from "../../store/Hooks/User/hook.useOrder.js";
 
+// Utility function to determine payment method from order data
+const getPaymentMethodInfo = (order) => {
+  // Check if payments array exists and has payment records
+  if (order?.payments && order.payments.length > 0) {
+    // Get the most recent successful payment or the first payment
+    const successfulPayment = order.payments.find(
+      (payment) => payment.status === "captured" || payment.status === "paid"
+    );
+    const payment = successfulPayment || order.payments[0];
+
+    if (payment) {
+      let method = "Unknown";
+
+      switch (payment.method) {
+        case "cod":
+          method = "Cash on Delivery";
+          break;
+        case "card":
+          method =
+            payment.provider === "razorpay"
+              ? "Online Payment (Card)"
+              : "Card Payment";
+          break;
+        case "upi":
+          method =
+            payment.provider === "razorpay"
+              ? "Online Payment (UPI)"
+              : "UPI Payment";
+          break;
+        default:
+          method = payment.method || "Unknown";
+      }
+
+      return {
+        method,
+        status: payment.status,
+        provider: payment.provider,
+      };
+    }
+  }
+
+  // Fallback based on payment status
+  if (order?.paymentStatus === "paid") {
+    return {
+      method: "Online Payment",
+      status: "paid",
+      provider: null,
+    };
+  }
+
+  return {
+    method: "Cash on Delivery",
+    status: order?.paymentStatus || "pending",
+    provider: null,
+  };
+};
+
 /**
  * Profile page component
  * @returns {                            </div>
@@ -661,16 +718,7 @@ const Profile = () => {
                     </div>
                   ) : (
                     <div className="space-y-6 max-h-[87vh] overflow-y-auto scrollbar-hide">
-                      {console.log("🛒 PROFILE DEBUG - Orders data:", orders)}
                       {orders.map((order, index) => {
-                        console.log(
-                          "🛒 PROFILE DEBUG - Processing order:",
-                          order
-                        );
-                        console.log(
-                          "🛒 PROFILE DEBUG - Order items:",
-                          order.items
-                        );
                         return (
                           <div
                             key={order._id}
@@ -717,6 +765,28 @@ const Profile = () => {
                                       month: "long",
                                       day: "numeric",
                                     }
+                                  )}
+                                </p>
+                                <p className="text-sm text-gray-500 flex items-center">
+                                  <svg
+                                    className="w-4 h-4 text-gray-400 mr-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                    />
+                                  </svg>
+                                  Payment: {getPaymentMethodInfo(order).method}
+                                  {getPaymentMethodInfo(order).status ===
+                                    "captured" && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                                      Paid
+                                    </span>
                                   )}
                                 </p>
                               </div>

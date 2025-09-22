@@ -70,22 +70,6 @@ const Cart = () => {
   // Calculate cart totals - provide fallback for items
   const cartItems = items || [];
 
-  // Debug: Log cart items to see the data structure
-  console.log("🛒 CART DEBUG - Items:", cartItems);
-  if (cartItems.length > 0) {
-    console.log("🛒 CART DEBUG - First item:", cartItems[0]);
-    console.log("🛒 CART DEBUG - Product data:", cartItems[0].product);
-    console.log("🛒 CART DEBUG - Variant data:", cartItems[0].variant);
-    console.log(
-      "🛒 CART DEBUG - Inventory data:",
-      cartItems[0].variant?.inventoryId
-    );
-    console.log(
-      "🛒 CART DEBUG - Stock available:",
-      cartItems[0].variant?.inventoryId?.quantityAvailable
-    );
-  }
-
   const subtotal = cartItems.reduce((sum, item) => {
     // Use totalPrice from backend if available, otherwise calculate from variant price
     if (item.totalPrice) {
@@ -95,7 +79,7 @@ const Cart = () => {
     const price = item.variant?.price || item.variantId?.price || 0;
     return sum + price * item.quantity;
   }, 0);
-  const tax = subtotal * 0.08; // 8% tax rate
+  const tax = 0; // 8% tax rate
   const shipping = subtotal > 100 ? 0 : 10; // Free shipping over $100
   const total = subtotal + tax + shipping;
 
@@ -219,7 +203,7 @@ const Cart = () => {
                             )}
 
                             <p className="text-lg font-semibold text-gray-900 mt-2">
-                              $
+                              ₹
                               {item.variant?.price ||
                                 item.variantId?.price ||
                                 item.totalPrice / item.quantity ||
@@ -287,7 +271,7 @@ const Cart = () => {
 
                             {/* Item Total */}
                             <p className="text-lg font-semibold text-gray-900">
-                              $
+                              ₹
                               {item.totalPrice
                                 ? item.totalPrice.toFixed(2)
                                 : (
@@ -346,14 +330,14 @@ const Cart = () => {
                     Subtotal ({cartItems.length} items)
                   </span>
                   <span className="font-medium text-gray-900">
-                    ${subtotal.toFixed(2)}
+                    ₹{subtotal.toFixed(2)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium text-gray-900">
-                    ${tax.toFixed(2)}
+                    ₹{tax.toFixed(2)}
                   </span>
                 </div>
 
@@ -367,14 +351,14 @@ const Cart = () => {
                 {/* Free Shipping Notice */}
                 {subtotal < 100 && (
                   <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
-                    Add ${(100 - subtotal).toFixed(2)} more for free shipping!
+                    Add ₹{(100 - subtotal).toFixed(2)} more for free shipping!
                   </div>
                 )}
 
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-semibold">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-gray-900">${total.toFixed(2)}</span>
+                    <span className="text-gray-900">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

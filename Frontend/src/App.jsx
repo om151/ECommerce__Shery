@@ -10,8 +10,10 @@ import {
 } from "react-router-dom";
 
 // Import layout components
+import BackToTopButton from "./Components/Common/BackToTopButton.jsx";
 import Footer from "./Components/Common/Footer.jsx";
 import Header from "./Components/Common/Header.jsx";
+import ScrollToTop from "./Components/Common/ScrollToTop.jsx";
 
 // Import page components
 import AdminPanel from "./pages/Admin/AdminPanel.jsx";
@@ -52,6 +54,9 @@ function App() {
   return (
     // Router provides routing functionality to entire app
     <Router>
+      {/* Scroll to top on route change */}
+      <ScrollToTop />
+
       {/* Main app layout */}
       <div className="min-h-screen flex flex-col">
         {/* Header - Navigation and user actions */}
@@ -148,6 +153,9 @@ function App() {
         {/* Footer - Site information and links */}
         <Footer />
       </div>
+
+      {/* Back to top button - floats over content */}
+      <BackToTopButton />
     </Router>
   );
 }

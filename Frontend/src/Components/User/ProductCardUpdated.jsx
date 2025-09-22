@@ -155,11 +155,11 @@ const ProductCard = ({
   if (viewMode === "grid") {
     return (
       <div
-        className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden ${className}`}
+        className={`group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden h-full flex flex-col ${className}`}
         {...props}
       >
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-square overflow-hidden flex-shrink-0">
           <Link to={`/product/${product._id}`}>
             {firstImage ? (
               <img
@@ -230,8 +230,8 @@ const ProductCard = ({
           </div>
         </div>
 
-        {/* Product Info */}
-        <div className="p-4">
+        {/* Product Info - This will expand to fill available space */}
+        <div className="p-4 flex flex-col flex-grow">
           {/* Product Title */}
           <Link to={`/product/${product._id}`} className="block">
             <h3 className="font-semibold text-lg text-gray-900 hover:text-indigo-600 transition-colors duration-200 mb-2 line-clamp-2">
@@ -283,7 +283,7 @@ const ProductCard = ({
           </div>
 
           {/* Price */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 mt-auto">
             <div className="flex items-center space-x-2">
               <span className="text-lg font-bold text-gray-900">
                 ₹{defaultVariant?.price?.toLocaleString() || "0"}
@@ -296,7 +296,7 @@ const ProductCard = ({
             </div>
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Add to Cart Button - Always at the bottom */}
           <Button
             variant="primary"
             size="sm"

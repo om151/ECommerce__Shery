@@ -2,6 +2,74 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getOrderById } from "../../shared/api/User/order.apiService.js";
 
+// Utility function to determine payment method from order data
+const getPaymentMethodInfo = (order) => {
+  // Check if payments array exists and has payment records
+  if (order?.payments && order.payments.length > 0) {
+    // Get the most recent successful payment or the first payment
+    const successfulPayment = order.payments.find(
+      (payment) => payment.status === "captured" || payment.status === "paid"
+    );
+    const payment = successfulPayment || order.payments[0];
+
+    if (payment) {
+      let method = "Unknown";
+      let provider = payment.provider || "";
+
+      switch (payment.method) {
+        case "cod":
+          method = "Cash on Delivery";
+          break;
+        case "card":
+          method =
+            provider === "razorpay" ? "Online Payment (Card)" : "Card Payment";
+          break;
+        case "upi":
+          method =
+            provider === "razorpay" ? "Online Payment (UPI)" : "UPI Payment";
+          break;
+        default:
+          method = payment.method || "Unknown";
+      }
+
+      return {
+        method,
+        transactionId: payment.transactionId,
+        status: payment.status,
+        provider: payment.provider,
+      };
+    }
+  }
+
+  // Enhanced fallback logic - check paymentStatus more thoroughly
+  if (order?.paymentStatus === "paid") {
+    return {
+      method: "Online Payment",
+      transactionId: null,
+      status: "paid",
+      provider: null,
+    };
+  } else if (
+    order?.paymentStatus === "pending" ||
+    order?.paymentStatus === "unpaid"
+  ) {
+    // If it's pending/unpaid, it's likely COD
+    return {
+      method: "Cash on Delivery",
+      transactionId: null,
+      status: order?.paymentStatus || "pending",
+      provider: null,
+    };
+  }
+
+  return {
+    method: "Cash on Delivery",
+    transactionId: null,
+    status: order?.paymentStatus || "pending",
+    provider: null,
+  };
+};
+
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const location = useLocation();
@@ -17,10 +85,6 @@ const OrderConfirmation = () => {
   useEffect(() => {
     if (orderId) {
       // Always fetch order details from API to get populated fields
-      console.log(
-        "📦 ORDER CONFIRMATION - Fetching order from API for ID:",
-        orderId
-      );
       fetchOrderDetails();
     } else {
       setError("No order information available");
@@ -32,21 +96,10 @@ const OrderConfirmation = () => {
     try {
       setLoading(true);
       const response = await getOrderById(orderId);
-      console.log("📦 ORDER CONFIRMATION - Raw API response:", response);
-
       const orderData = response.order || response.data;
-      console.log("📦 ORDER CONFIRMATION - Extracted order data:", orderData);
-      console.log(
-        "📦 ORDER CONFIRMATION - Order items structure:",
-        orderData?.items
-      );
-
       setOrder(orderData);
     } catch (error) {
-      console.error(
-        "📦 ORDER CONFIRMATION - Failed to fetch order details:",
-        error
-      );
+      console.error("❌ Failed to fetch order details:", error);
       setError("Failed to load order details");
     } finally {
       setLoading(false);
@@ -186,27 +239,49 @@ const OrderConfirmation = () => {
             </div>
           </div>
 
-          {/* Payment Information - Show if available from navigation state */}
-          {(paymentId || paymentMethod) && (
+          {/* Payment Information - Show from order data or navigation state */}
+          {order && (
             <div className="border-t pt-4 mb-4">
               <h4 className="text-sm font-medium text-gray-900 mb-2">
                 Payment Information
               </h4>
               <div className="space-y-1">
-                {paymentMethod && (
-                  <p className="text-sm text-gray-600">
-                    Payment Method:{" "}
-                    <span className="font-medium">{paymentMethod}</span>
-                  </p>
-                )}
-                {paymentId && (
-                  <p className="text-sm text-gray-600">
-                    Payment ID:{" "}
-                    <span className="font-medium font-mono text-xs">
-                      {paymentId}
-                    </span>
-                  </p>
-                )}
+                {(() => {
+                  // Use payment info from order data first, then fallback to navigation state
+                  const paymentInfo = getPaymentMethodInfo(order);
+                  const displayMethod = paymentInfo.method || paymentMethod;
+                  const displayTransactionId =
+                    paymentInfo.transactionId || paymentId;
+
+                  return (
+                    <>
+                      {displayMethod && (
+                        <p className="text-sm text-gray-600">
+                          Payment Method:{" "}
+                          <span className="font-medium">{displayMethod}</span>
+                          {paymentInfo.status === "captured" && (
+                            <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                              Paid
+                            </span>
+                          )}
+                          {paymentInfo.status === "pending" && (
+                            <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                              Pending
+                            </span>
+                          )}
+                        </p>
+                      )}
+                      {displayTransactionId && (
+                        <p className="text-sm text-gray-600">
+                          Transaction ID:{" "}
+                          <span className="font-medium font-mono text-xs">
+                            {displayTransactionId}
+                          </span>
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -216,22 +291,9 @@ const OrderConfirmation = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Items Ordered
             </h3>
-            {/* Debug: Show raw items data */}
-            {process.env.NODE_ENV === "development" && (
-              <details className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                <summary className="cursor-pointer text-sm text-yellow-800">
-                  Debug: Raw Order Items
-                </summary>
-                <pre className="mt-2 text-xs overflow-x-auto">
-                  {JSON.stringify(order.items, null, 2)}
-                </pre>
-              </details>
-            )}
             <div className="space-y-4">
               {order.items?.map((item, index) => {
                 // Handle populated OrderItem structure
-                console.log("📦 ITEM DEBUG - Raw item data:", item);
-
                 // Extract data from populated OrderItem structure
                 let quantity = Number(item.quantity) || 0;
                 let unitPrice = Number(item.unitPrice) || 0;
@@ -254,21 +316,8 @@ const OrderConfirmation = () => {
                   variantName = item.variant?.name || item.variantName || "";
                 }
 
-                console.log("📦 ITEM DEBUG - Processed data:", {
-                  index,
-                  quantity,
-                  unitPrice,
-                  subtotal,
-                  title,
-                  variantName,
-                });
-
                 // Don't render items with 0 quantity
                 if (quantity === 0) {
-                  console.warn(
-                    "📦 ITEM DEBUG - Skipping item with 0 quantity:",
-                    item
-                  );
                   return null;
                 }
 
@@ -287,11 +336,6 @@ const OrderConfirmation = () => {
                         <span className="font-medium">{quantity}</span> ×{" "}
                         {formatCurrency(unitPrice)}
                       </p>
-                      {process.env.NODE_ENV === "development" && (
-                        <p className="text-xs text-blue-500">
-                          Debug: Q={quantity}, P={unitPrice}, S={subtotal}
-                        </p>
-                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-900">
@@ -355,42 +399,53 @@ const OrderConfirmation = () => {
             Payment Information
           </h3>
           <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Payment Method:</span>
-              <span className="text-gray-900">
-                {paymentMethod === "COD"
-                  ? "Cash on Delivery"
-                  : paymentMethod === "ONLINE"
-                  ? "Online Payment"
-                  : order.paymentMethod || "COD"}
-              </span>
-            </div>
-            {paymentId && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">Payment ID:</span>
-                <span className="text-gray-900 font-mono text-sm">
-                  {paymentId}
-                </span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Payment Status:</span>
-              <span
-                className={`font-medium ${
-                  paymentMethod === "COD"
-                    ? "text-yellow-600"
-                    : paymentId
-                    ? "text-green-600"
-                    : "text-yellow-600"
-                }`}
-              >
-                {paymentMethod === "COD"
-                  ? "Pay on Delivery"
-                  : paymentId
-                  ? "Paid"
-                  : "Processing"}
-              </span>
-            </div>
+            {(() => {
+              // Use the same payment detection logic as the first section
+              const paymentInfo = getPaymentMethodInfo(order);
+              const displayMethod = paymentInfo.method || paymentMethod;
+              const displayTransactionId =
+                paymentInfo.transactionId || paymentId;
+              const paymentStatus = paymentInfo.status;
+
+              return (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Payment Method:</span>
+                    <span className="text-gray-900">{displayMethod}</span>
+                  </div>
+                  {displayTransactionId && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Transaction ID:</span>
+                      <span className="text-gray-900 font-mono text-sm">
+                        {displayTransactionId}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Payment Status:</span>
+                    <span
+                      className={`font-medium ${
+                        paymentStatus === "captured" || paymentStatus === "paid"
+                          ? "text-green-600"
+                          : paymentStatus === "pending"
+                          ? "text-yellow-600"
+                          : displayMethod === "Cash on Delivery"
+                          ? "text-yellow-600"
+                          : "text-yellow-600"
+                      }`}
+                    >
+                      {paymentStatus === "captured" || paymentStatus === "paid"
+                        ? "Paid"
+                        : paymentStatus === "pending"
+                        ? "Pending"
+                        : displayMethod === "Cash on Delivery"
+                        ? "Pay on Delivery"
+                        : "Processing"}
+                    </span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 

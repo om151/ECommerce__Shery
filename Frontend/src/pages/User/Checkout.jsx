@@ -32,17 +32,6 @@ const Checkout = () => {
   const [couponError, setCouponError] = useState("");
 
   // Calculate totals (removed tax)
-  // Debug cart items
-  if (cartItems.length > 0) {
-    console.log("🛒 CHECKOUT DEBUG - First item:", cartItems[0]);
-    console.log("🛒 CHECKOUT DEBUG - Item price sources:", {
-      totalPrice: cartItems[0].totalPrice,
-      variantPrice: cartItems[0].variant?.price,
-      productPrice: cartItems[0].product?.price,
-      itemPrice: cartItems[0].price,
-    });
-  }
-
   const subtotal = cartItems.reduce((sum, item) => {
     // Use totalPrice from backend if available, otherwise calculate from available price sources
     if (item.totalPrice) {

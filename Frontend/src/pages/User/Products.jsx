@@ -351,7 +351,7 @@ const Products = () => {
                 )}
 
                 {/* Color Filter */}
-                {availableFilters.colors.length > 0 && (
+                {/* {availableFilters.colors.length > 0 && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-3">Color</h4>
                     <div className="flex flex-wrap gap-2">
@@ -375,7 +375,7 @@ const Products = () => {
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Size Filter */}
                 {availableFilters.sizes.length > 0 && (
@@ -405,7 +405,7 @@ const Products = () => {
                 )}
 
                 {/* Stock Status */}
-                <div>
+                {/* <div>
                   <h4 className="font-medium text-gray-900 mb-3">
                     Availability
                   </h4>
@@ -422,7 +422,7 @@ const Products = () => {
                       In Stock Only
                     </span>
                   </label>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
