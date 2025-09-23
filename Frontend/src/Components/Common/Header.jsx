@@ -98,7 +98,7 @@ const Header = () => {
 
           {/* Search Bar - Desktop */}
           {/* Hide search for admin users */}
-          {!isAdmin && (
+          {/* {!isAdmin && (
             <div className="hidden md:block flex-1 max-w-lg mx-8">
               <form onSubmit={handleSearch} className="relative">
                 <input
@@ -108,7 +108,6 @@ const Header = () => {
                   placeholder="Search products..."
                   className="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
-                {/* Search Icon */}
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3">
                   <svg
                     className="w-4 h-4 text-gray-400"
@@ -126,7 +125,7 @@ const Header = () => {
                 </div>
               </form>
             </div>
-          )}
+          )} */}
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">

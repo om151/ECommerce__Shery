@@ -67,7 +67,7 @@ const Home = () => {
                 <Link to="/products">
                   <Button
                     size="lg"
-                    className="bg-white text-[#1c5be1] hover:bg-gray-400 hover:text-white"
+                    className="bg-white text-[#194ec1] hover:bg-gray-400 hover:text-white"
                   >
                     Shop Now
                   </Button>
@@ -285,7 +285,7 @@ const Home = () => {
             <Button
               type="submit"
               size="lg"
-              className="bg-white text-[#1c5be1] hover:bg-gray-400 hover:text-white px-8"
+              className="bg-white text-[#194ec1] hover:bg-gray-400 hover:text-white px-8"
             >
               Subscribe
             </Button>
