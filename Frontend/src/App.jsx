@@ -9,6 +9,8 @@ import {
   Routes,
 } from "react-router-dom";
 
+import UserAlreadyLogin from "./utils/userAlreadyLogin.jsx";
+
 // Import layout components
 import BackToTopButton from "./Components/Common/BackToTopButton.jsx";
 import Footer from "./Components/Common/Footer.jsx";
@@ -80,8 +82,18 @@ function App() {
               path="/product/:id"
               element={isAdmin ? <Navigate to="/admin" replace /> : <Product />}
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+
+              <Route path="/login" element={ 
+                <UserAlreadyLogin>
+                  <Login />
+                </UserAlreadyLogin>
+              } />
+            <Route path="/register" element={
+              <UserAlreadyLogin>
+                <Register />
+              </UserAlreadyLogin>
+            } />
+
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route
