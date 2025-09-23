@@ -72,8 +72,9 @@ export const useAuth = () => {
         dispatch(registerSuccess(response));
         return { type: "auth/register/fulfilled", payload: response };
       } catch (error) {
+        console.log(error)
         const errorMessage =
-          error.response?.data?.message ||
+          error.response?.data?.errors[0].msg ||
           error.message ||
           "Registration failed";
         dispatch(setAuthError(errorMessage));
